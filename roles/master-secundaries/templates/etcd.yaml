@@ -12,7 +12,7 @@ metadata:
 spec:
   hostNetwork: true
   containers:
-  - image: gcr.io/google_containers/etcd-arm:3.1.10
+  - image: {{ ETCD_IMAGE }}
     name: etcd-container
     command:
     - /usr/local/bin/etcd
@@ -32,7 +32,7 @@ spec:
     - --initial-cluster-state
     - existing
     - --initial-cluster
-    - {% for host in groups['masters'] %}{{ hostvars[host]['inventory_hostname'] }}=http://{{ hostvars[host]['inventory_hostname'] }}:2380{% if not loop.last %},{% endif %}{% endfor %}
+    - {{ added_etcd }}
 
     livenessProbe:
       failureThreshold: 8

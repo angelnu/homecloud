@@ -6,14 +6,11 @@
 # You timezone
 timezone: "Europe/Madrid"
 
-#Architecture - TBD (detect)
-arch: arm
-
 # Base settings
 MASTER_VIP: 192.168.2.220
 
 #If set to true it will reset the K8S cluster
-k8s_reset: false
+k8s_reset: true
 
 #Secret token for the cluster - TBD generate
 #NOTE: also using for etcd
@@ -23,6 +20,7 @@ master: "{{ groups['masters'][0] }}"
 
 #Peer ID of the first etcd Peer
 ETCD_FIRST_PEER: 8e9e05c52164694d
+ETCD_IMAGE: "gcr.io/google_containers/etcd{{ '-arm' if 'arm' in ansible_architecture else '' }}:3.1.10"
 
 #K8S files in the server
 K8S_ETC_PATH: /etc/kubernetes

@@ -51,13 +51,13 @@
   when: update_etc_result.changed
   register: result
   until: result|succeeded
-  retries: 30
-  delay: 10
+  retries: 60
+  delay: 5
 
 
 
-- name: Download etcd configuration - {{etcd_cfg_path}}
-  fetch:
-    src: "{{etcd_cfg_path}}"
-    dest: "./kubeconfig/"
-    flat: yes
+# - name: Download etcd configuration - {{etcd_cfg_path}}
+#   fetch:
+#     src: "{{etcd_cfg_path}}"
+#     dest: "./kubeconfig/"
+#     flat: yes

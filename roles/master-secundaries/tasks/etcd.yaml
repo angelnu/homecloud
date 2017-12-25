@@ -1,0 +1,39 @@
+
+- name: "Generate etcd initial_cluster string"
+  set_fact:
+    added_etcd:  "{% set ns = namespace(continue=true) %}\
+                  {% for host in groups['masters'] %}\
+                    {% if ns.continue %}\
+                      {{ hostvars[host]['inventory_hostname'] }}=http://{{ hostvars[host]['inventory_hostname'] }}:2380\
+                      {% if host|string() == inventory_hostname|string() %}\
+                        {% set ns.continue = false %}\
+                      {% endif %}\
+                      {% if not loop.last %},{% endif %}\
+                    {% endif %}\
+                  {% endfor %}"
+
+- name: Write etcd config file
+  template: src=etcd.yaml dest={{etcd_cfg_path}} group=root owner=root mode=0700
+  register: update_etc_result
+
+- name: Start kubelet on secondary master
+  service: name=kubelet state=started enabled=yes
+
+# - name: Add etcd peer to exisiting etcd cluster
+#   uri:
+#     url: http://{{ master }}:2379/v2/members
+#     method: POST
+#     body: "{{ lookup('file','issue.json') }}"
+#     force_basic_auth: yes
+#     status_code: 201
+#     body_format: json
+
+- name: Add etcd peer to exisiting etcd cluster
+  shell: "kubectl -n kube-system exec etcd-{{ master }} -- etcdctl member add {{inventory_hostname}} http://{{inventory_hostname}}:2380"
+  environment: "{{kube_cfg_env}}"
+  #when: update_etc_result.changed
+  delegate_to: "{{master}}"
+
+- name: Wait for etcd to spawn
+  shell: "while ! (docker ps|grep /etcd); do echo Waiting for etcd;sleep 2; done"
+  when: update_etc_result.changed

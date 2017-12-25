@@ -13,6 +13,6 @@
       when: kubelet_st.stat.exists == False
   rescue:
     - name: Error initializing -> reset cluster
-      shell: "kubeadm reset"
+      shell: "echo kubeadm reset"
     - fail:
         msg: Partitially initisalised cluster deleted. Terminating now.

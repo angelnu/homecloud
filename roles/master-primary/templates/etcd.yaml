@@ -12,7 +12,7 @@ metadata:
 spec:
   hostNetwork: true
   containers:
-  - image: gcr.io/google_containers/etcd-arm:3.1.10
+  - image: {{ ETCD_IMAGE }}
     name: etcd-container
     command:
     - /usr/local/bin/etcd

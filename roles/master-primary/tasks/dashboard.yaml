@@ -1,5 +1,5 @@
 - name: Install Kubernetes Dashboard
-  shell: kubectl apply -f https://github.com/kubernetes/dashboard/blob/master/src/deploy/recommended/kubernetes-dashboard{{ '-arm' if arch=="arm" else '' }}.yaml?raw=true
+  shell: kubectl apply -f https://github.com/kubernetes/dashboard/blob/master/src/deploy/recommended/kubernetes-dashboard{{ '-arm' if 'arm' in ansible_architecture else '' }}.yaml?raw=true
   args:
     warn: false
   environment: "{{kube_cfg_env}}"

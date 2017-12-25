@@ -1,5 +1,5 @@
 - name: Initialize Kubernetes cluster #for ARM with flannel support
-  shell: "kubeadm init --token {{ token }} --node-name={{inventory_hostname}} --apiserver-cert-extra-sans=127.0.0.1,{% for host in groups['masters'] %}{{ hostvars[host]['inventory_hostname'] }}{% if not loop.last %},{% endif %}{% endfor %}"
+  shell: "kubeadm init {{KUBEADM_OPTS| default('')}} --token {{ token }} --node-name={{inventory_hostname}} --apiserver-cert-extra-sans=127.0.0.1,{% for host in groups['masters'] %}{{ hostvars[host]['inventory_hostname'] }}{% if not loop.last %},{% endif %}{% endfor %}"
   #shell: "kubeadm init --token {{ token }} --pod-network-cidr={{cidr}} --node-name={{inventory_hostname}}"
 
 # - name: Install Networking Pods
@@ -27,5 +27,16 @@
   - "'not found' not in remove_taint_result.stderr"
   - remove_taint_result.rc != 0
 
+- name: Remove 'NodeRestriction' from apiserver
+  command: "perl -pi -e 's/.*--admission-control=.*/    - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota,DefaultTolerationSeconds/' /etc/kubernetes/manifests/kube-apiserver.yaml"
+
 - name: Convert etcd to cluster
   import_tasks: etcd.yaml
+
+- name: Wait for apiserver to be restarted
+  shell: it=0; while ! kubectl get nodes; do test $it -gt 50 && exit 1; echo "Waiting for apiserver to be restarted..."; sleep 2s; it=`expr $it + 1`; done
+  environment: "{{kube_cfg_env}}"
+
+- name: Wait for master node to be ready
+  shell: it=0; while kubectl get nodes | grep -q "NotReady"; do test $it -gt 50 && exit 1; echo "Waiting for primary node to be ready..."; sleep 2s; it=`expr $it + 1`; done
+  environment: "{{kube_cfg_env}}"
