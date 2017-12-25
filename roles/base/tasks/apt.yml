@@ -4,17 +4,19 @@
     state: present
     force: yes
 
-- name: Add Hypriot Repo Key
-  apt_key: url=https://packagecloud.io/gpg.key
-
-- name: Add Hypriot Repo
-  apt_repository: repo='deb https://packagecloud.io/Hypriot/Schatzkiste/debian/ wheezy main' state=present
+- name: Add docker Repo
+  apt_repository:
+    repo: deb https://apt.dockerproject.org/repo ubuntu-xenial main
+    state: present
 
 - name: Add Kubernetes Repo Key
-  apt_key: url=https://packages.cloud.google.com/apt/doc/apt-key.gpg
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
 
 - name: Add Kubernetes Repo
-  apt_repository: repo='deb http://apt.kubernetes.io/ kubernetes-xenial main' state=present
+  apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
 
 - name: Update APT package cache
   apt:
@@ -27,7 +29,4 @@
     force: yes
     state: present
   with_items:
-    - kubelet
     - kubeadm
-    - kubectl
-    - kubernetes-cni

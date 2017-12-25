@@ -1,0 +1,45 @@
+#- name: Stop kubelet
+#  service: name=kubelet enabled=yes state=stopped
+
+# - name: Push kubernetes configuration - {{K8S_ETC_PATH}}
+#   synchronize:
+#     dest: "{{K8S_ETC_PATH}}"
+#     src: "./kubeconfig/"
+
+- name: Adding node to cluster
+  shell: kubeadm join --token {{ token }} --discovery-token-unsafe-skip-ca-verification --node-name={{inventory_hostname}} {{ master }}:6443
+
+- name: Write etcd config file
+  template: src=etcd.yaml dest={{etcd_cfg_path}} group=root owner=root mode=0700
+  register: update_etc_result
+
+- name: Restart kubelet
+  service: name=kubelet enabled=yes state=restarted
+
+- name: Wait for etcd to spawn
+  shell: "while ! (docker ps|grep /etcd); do echo Waiting for etcd;sleep 2; done"
+  when: update_etc_result.changed
+
+- name: Add etcd peer to exisiting etcd cluster
+  shell: "kubectl -n kube-system exec etcd-{{ master }} -- etcdctl member add {{inventory_hostname}} http://{{inventory_hostname}}:2380"
+  environment: "{{kube_cfg_env}}"
+  #when: update_etc_result.changed
+  delegate_to: "{{master}}"
+
+# - name: Delete unneded files copied from primary master
+#   shell: rm {{K8S_ETC_PATH}}/pki/ca.crt {{K8S_ETC_PATH}}/kubelet.conf
+
+- name: Mark node as master
+  shell: "kubeadm alpha phase mark-master --node-name {{inventory_hostname}}"
+  environment: "{{kube_cfg_env}}"
+  delegate_to: "{{master}}"
+
+# - name: "Fix IP address from API server"
+#   shell: "sed 's/192.168.2.61/127.0.0.1/g' -i {{ item }}"
+#   with_items:
+#     - "{{K8S_ETC_PATH}}/scheduler.conf"
+#     - "{{K8S_ETC_PATH}}/kubelet.conf"
+#     - "{{K8S_ETC_PATH}}/controller-manager.conf"
+#
+# - name: "Fix IP address from API server"
+#   shell: "sed 's/192.168.2.61/{{ ansible_default_ipv4.address }}/g' -i {{K8S_ETC_PATH}}/manifests/kube-apiserver.yaml"

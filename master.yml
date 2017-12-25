@@ -1,11 +1,11 @@
-- name: Kubernetes master configuration
-  hosts: master
-  gather_facts: yes
-  remote_user: pi
-  become: true
-  vars_files:
-    - config.yml
+- name: Kubernetes primary master configuration
+  hosts: masters[0]
 
   roles:
-  - master
-  - dashboard
+  - master-primary
+
+- name: Kubernetes secundary masters configuration
+  hosts: masters[1:]
+
+  roles:
+  - master-secundaries

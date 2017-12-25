@@ -1,0 +1,39 @@
+#
+# Global variables for all nodes
+#
+---
+
+# You timezone
+timezone: "Europe/Madrid"
+
+#Architecture - TBD (detect)
+arch: arm
+
+# Base settings
+MASTER_VIP: 192.168.2.220
+
+#If set to true it will reset the K8S cluster
+k8s_reset: false
+
+#Secret token for the cluster - TBD generate
+#NOTE: also using for etcd
+token: 506f42.4251ab3d42ed9d10
+master: "{{ groups['masters'][0] }}"
+#cidr: 10.244.0.0/16
+
+#Peer ID of the first etcd Peer
+ETCD_FIRST_PEER: 8e9e05c52164694d
+
+#K8S files in the server
+K8S_ETC_PATH: /etc/kubernetes
+etcd_cfg_path: "/etc/kubernetes/manifests/etcd.yaml"
+kubelet_cfg_path: "/etc/kubernetes/kubelet.conf"
+kube_cfg_path: "/etc/kubernetes/admin.conf"
+
+#Environment varibles for kubectl
+kube_cfg_env:
+  KUBECONFIG: "{{kube_cfg_path}}"
+
+#Environment varibles for kubectl
+LOCAL_KUBECTL_ENV:
+  KUBECONFIG: "./kubeconfig/admin.conf"

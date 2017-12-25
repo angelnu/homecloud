@@ -1,1 +1,0 @@
-kubeadm join --token $1 $2

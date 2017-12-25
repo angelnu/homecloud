@@ -1,0 +1,11 @@
+- name: Install Kubernetes Dashboard
+  shell: kubectl apply -f https://github.com/kubernetes/dashboard/blob/master/src/deploy/recommended/kubernetes-dashboard{{ '-arm' if arch=="arm" else '' }}.yaml?raw=true
+  args:
+    warn: false
+  environment: "{{kube_cfg_env}}"
+  register: install_network_result
+  failed_when:
+  - "'AlreadyExists' not in install_network_result.stderr"
+  - install_network_result.rc != 0
+  changed_when: "'AlreadyExists' not in install_network_result.stderr"
+  when: kubelet_st.stat.exists == False
