@@ -16,6 +16,19 @@ k8s_reset: true
 #NOTE: also using for etcd
 token: 506f42.4251ab3d42ed9d10
 master: "{{ groups['masters'][0] }}"
+KUBELET_DYN_CONFIG_PATH: /var/lib/kubelet/config/dynamic
+KUBELET_CHECKPOINT_PATH: /etc/kubernetes/checkpoint
+KUBELET_OPTS:
+ "--feature-gates=DynamicKubeletConfig=true
+  --dynamic-config-dir={{KUBELET_DYN_CONFIG_PATH}}
+  --bootstrap-checkpoint-path={{KUBELET_CHECKPOINT_PATH}}"
+# KUBEADM_OPTS:
+#  "--feature-gates=DynamicKubeletConfig=true,\
+#   HighAvailability=true\
+#   SelfHosting=true,\
+#   StoreCertsInSecrets=true"
+KUBEADM_OPTS:
+ "--feature-gates=DynamicKubeletConfig=true"
 #cidr: 10.244.0.0/16
 
 #Peer ID of the first etcd Peer

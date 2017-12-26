@@ -17,7 +17,7 @@
   register: update_etc_result
 
 - name: Start kubelet on secondary master
-  service: name=kubelet state=started enabled=yes
+  service: name=kubelet state=restarted enabled=yes
 
 # - name: Add etcd peer to exisiting etcd cluster
 #   uri:
@@ -34,6 +34,11 @@
   #when: update_etc_result.changed
   delegate_to: "{{master}}"
 
-- name: Wait for etcd to spawn
-  shell: "while ! (docker ps|grep /etcd); do echo Waiting for etcd;sleep 2; done"
+- name: "Change peer URL for master etcd"
+  shell: "kubectl -n kube-system exec etcd-{{inventory_hostname}} -- etcdctl member update {{ ETCD_FIRST_PEER }} http://{{inventory_hostname}}:2380"
+  environment: "{{kube_cfg_env}}"
   when: update_etc_result.changed
+  register: result
+  until: result|succeeded
+  retries: 60
+  delay: 5
