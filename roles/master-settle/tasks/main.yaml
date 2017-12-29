@@ -1,20 +1,13 @@
-- name: Wait for apiserver
-  shell: kubectl get nodes
-  environment: "{{kube_cfg_env}}"
-  register: result
-  until: result|succeeded
-  retries: 120
-  delay: 5
-  changed_when: false
-
 - name: Wait for node to be ready
-  shell: kubectl get nodes | grep {{inventory_hostname}}
+  shell: "kubectl get nodes -o json {{inventory_hostname}}"
   environment: "{{kube_cfg_env}}"
   register: result
-  until: "result|succeeded and (result.stdout | json_query(conditions[?reason=='KubeletReady']))"
+  vars:
+    queryStr: "status.conditions[?reason=='KubeletReady'].status"
+  until: result|succeeded and (result.stdout | from_json | json_query(queryStr) == ['True'])
   retries: 60
   delay: 5
   changed_when: false
 
 - name: "Cache last node description as json variable"
-  set_fact: last_k8s_node_info=(result.stdout | from_json)
+  set_fact: last_k8s_node_info={{result.stdout | from_json}}

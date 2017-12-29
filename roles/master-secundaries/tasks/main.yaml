@@ -35,7 +35,7 @@
   environment: "{{kube_cfg_env}}"
   delegate_to: "{{master}}"
   register: result
-  when: "'master' not in last_k8s_node_info.stdout"
+  when: last_k8s_node_info.metadata.labels["node-role.kubernetes.io/master"] is not defined
 
 - import_role: name=master-settle
   when: result|changed
