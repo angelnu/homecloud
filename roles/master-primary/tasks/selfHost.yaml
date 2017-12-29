@@ -1,0 +1,8 @@
+- name: Self-hosted Kubernetes cluster
+  shell: kubeadm alpha phase selfhosting convert-from-staticpods
+
+- name: "Enable apiserver checkpointing"
+  shell: "kubectl -n kube-system annotate pods $(kubectl get pods -n kube-system | awk '/self-hosted-kube-apiserver/ {print $1;exit}') node.kubernetes.io/bootstrap-checkpoint='true'"
+  environment: "{{kube_cfg_env}}"
+
+- include_role: name=master-settle

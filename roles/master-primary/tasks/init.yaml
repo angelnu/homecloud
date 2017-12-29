@@ -23,7 +23,16 @@
   when: result.changed
 
 - name: Initialize Kubernetes cluster
-  shell: "kubeadm init {{KUBEADM_OPTS| default('')}} --token {{ token }} --node-name={{inventory_hostname}} --apiserver-cert-extra-sans=127.0.0.1,{% for host in groups['masters'] %}{{ hostvars[host]['inventory_hostname'] }}{% if not loop.last %},{% endif %}{% endfor %}"
+  shell:
+    "kubeadm init {{KUBEADM_OPTS| default('')}} \
+      --node-name={{inventory_hostname}} \
+      --apiserver-cert-extra-sans=127.0.0.1,\
+        {% for host in groups['masters'] %}\
+          {{ hostvars[host].inventory_hostname }},\
+          {{ hostvars[host].ansible_default_ipv4.address }}\
+          {% if not loop.last %},{% endif %}\
+        {% endfor %}\
+      "
   #shell: "kubeadm init --token {{ token }} --pod-network-cidr={{cidr}} --node-name={{inventory_hostname}}"
 
 # - name: Install Networking Pods
@@ -43,29 +52,14 @@
   shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
   environment: "{{kube_cfg_env}}"
 
-- name: Allow work to be dispatched to master
-  shell: "kubectl taint nodes {{inventory_hostname}}  node-role.kubernetes.io/master:NoSchedule-"
-  environment: "{{kube_cfg_env}}"
-  register: remove_taint_result
-  failed_when:
-  - "'not found' not in remove_taint_result.stderr"
-  - remove_taint_result.rc != 0
-
-- import_tasks: ../master-settle/main.yaml
+- import_role: name=master-settle
 
 #- name: Remove 'NodeRestriction' from apiserver
 #  command: "perl -pi -e 's/.*--admission-control=.*/    - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota,DefaultTolerationSeconds/' /etc/kubernetes/manifests/kube-apiserver.yaml"
 
-- name: Convert etcd to cluster
-  import_tasks: etcd.yaml
+- import_role: name=master-etcd
 
-- import_tasks: ../master-settle/main.yaml
+- import_role: name=master-settle
 
-- name: Self-hosted Kubernetes cluster
-  shell: kubeadm alpha phase selfhosting convert-from-staticpods
-
-- name: "Enable apiserver checkpointing"
-  shell: "kubectl -n kube-system annotate pods $(kubectl get pods -n kube-system | awk '/self-hosted-kube-apiserver/ {print $1;exit}') node.kubernetes.io/bootstrap-checkpoint='true'"
-  environment: "{{kube_cfg_env}}"
-
-- import_tasks: ../master-settle/main.yaml
+- import_tasks: selfHost.yaml
+  when: KUBELET_SELFHOST

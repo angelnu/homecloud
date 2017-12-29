@@ -4,9 +4,13 @@
     state: present
     force: yes
 
+- name: 'import Docker GPG signing key'
+  apt_key:
+    url: https://download.docker.com/linux/{{ansible_distribution|lower}}/gpg
+
 - name: Add docker Repo
   apt_repository:
-    repo: deb https://apt.dockerproject.org/repo ubuntu-xenial main
+    repo: deb https://download.docker.com/linux/{{ansible_distribution|lower}} {{ ansible_distribution_release }} stable
     state: present
 
 - name: Add Kubernetes Repo Key
@@ -15,13 +19,14 @@
 
 - name: Add Kubernetes Repo
   apt_repository:
+    #repo: deb http://apt.kubernetes.io/ kubernetes-{{ ansible_distribution_release }} main
     repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
     state: present
 
-- name: Update APT package cache
-  apt:
-    update_cache: yes
-    upgrade: safe
+#- name: Update system (after refreshing caches)
+#  apt:
+#    update_cache: yes
+#    upgrade: safe
 
 - name: Install Packages
   apt:
@@ -29,4 +34,6 @@
     force: yes
     state: present
   with_items:
+    - docker-ce=17.09.1~ce-0~ubuntu
     - kubeadm
+    - rsync

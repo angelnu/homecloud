@@ -1,0 +1,10 @@
+- name: Allow work to be dispatched to master
+  shell: "kubectl taint nodes {{inventory_hostname}}  node-role.kubernetes.io/master:NoSchedule-"
+  environment: "{{kube_cfg_env}}"
+  register: remove_taint_result
+  failed_when:
+  - "'not found' not in remove_taint_result.stderr"
+  - remove_taint_result.rc != 0
+
+- import_role: name=master-settle
+  when: remove_taint_result.changed

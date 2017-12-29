@@ -1,0 +1,50 @@
+
+- name: "Generate etcd initial_cluster string"
+  set_fact:
+    added_etcd:  "{% set ns = namespace(continue=true) %}\
+                  {% for host in groups['masters'] %}\
+                    {% if ns.continue %}\
+                      {{ hostvars[host]['inventory_hostname'] }}=http://{{ hostvars[host]['inventory_hostname'] }}:2380\
+                      {% if host|string() == inventory_hostname|string() %}\
+                        {% set ns.continue = false %}\
+                      {% else %}\
+                        ,\
+                      {% endif %}\
+                    {% endif %}\
+                  {% endfor %}"
+
+- name: Write etcd config file
+  template: src=etcd.yaml dest={{etcd_cfg_path}} group=root owner=root mode=0700
+  register: update_etc_result
+
+# - name: Restart Kubelet
+#   systemd:
+#     name: kubelet
+#     state: restarted
+#     enabled: yes
+#     daemon_reload: yes
+
+
+- name: "Run tasks for primary"
+  include_tasks: primary.yaml
+  when: inventory_hostname == master
+
+- name: "Run tasks for secundaries"
+  include_tasks: secundary.yaml
+  when: inventory_hostname != master
+
+- name: Restart Kubelet
+  systemd:
+    name: kubelet
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+  changed_when: false
+
+- name: "Wait for etcd to come back"
+  shell: docker ps|grep /etcd
+  when: update_etc_result.changed
+  register: result
+  until: result|succeeded
+  retries: 60
+  delay: 5

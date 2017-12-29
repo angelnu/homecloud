@@ -1,7 +1,3 @@
-- name: Reset Kubernetes installation
-  shell: "kubeadm reset; rm -rf {{KUBELET_CHECKPOINT_PATH}}"
-  when: k8s_reset
-
 - name: Check Kubelet config file - {{kubelet_cfg_path}}
   stat:
     path: "{{kubelet_cfg_path}}"

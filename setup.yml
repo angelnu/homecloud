@@ -1,5 +1,5 @@
 - name: Setup Systems to run Kubernetes
   hosts: all
 
-  roles:
-    - base
+  tasks:
+    - import_role: name=setup

@@ -1,0 +1,24 @@
+# - name: "Wait for etcd to come back"
+#   shell: docker ps|grep /etcd
+#   when: update_etc_result.changed
+#   register: result
+#   until: result|succeeded
+#   retries: 60
+#   delay: 5
+#
+# - name: "Wait for kube-apiserver to come back"
+#   shell: docker ps|grep /kube-apiserver
+#   when: update_etc_result.changed
+#   register: result
+#   until: result|succeeded
+#   retries: 60
+#   delay: 5
+
+- name: "Change peer URL for master etcd"
+  shell: "kubectl -n kube-system exec etcd-{{inventory_hostname}} -- etcdctl member update {{ ETCD_FIRST_PEER }} http://{{inventory_hostname}}:2380"
+  environment: "{{kube_cfg_env}}"
+  when: update_etc_result.changed
+  register: result
+  until: result|succeeded
+  retries: 60
+  delay: 5

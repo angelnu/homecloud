@@ -1,11 +1,23 @@
+- name: "Resetting if required"
+  hosts: all
+  tasks:
+    - import_role: name=reset
+      when: K8S_RESET
+
 - name: Kubernetes primary master configuration
   hosts: masters[0]
-
-  roles:
-  - master-primary
+  gather_facts: false #Already queried
+  tasks:
+    - import_role: name=master-primary
 
 - name: Kubernetes secundary masters configuration
   hosts: masters[1:]
+  gather_facts: false #Already queried
+  tasks:
+    - import_role: name=master-secundaries
 
-  roles:
-  - master-secundaries
+- name: Let masters run workloads
+  hosts: masters
+  gather_facts: false #Already queried
+  tasks:
+    - import_role: name=master-worker

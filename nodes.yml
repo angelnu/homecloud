@@ -1,5 +1,0 @@
-- name: Kubernetes nodes configuration
-  hosts: nodes
-
-  roles:
-  - node

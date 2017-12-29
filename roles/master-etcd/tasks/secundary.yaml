@@ -1,0 +1,22 @@
+# - name: Add etcd peer to exisiting etcd cluster
+#   uri:
+#     url: http://{{ master }}:2379/v2/members
+#     method: POST
+#     body: "{{ lookup('file','issue.json') }}"
+#     force_basic_auth: yes
+#     status_code: 201
+#     body_format: json
+- name: Add etcd peer to exisiting etcd cluster
+  shell: "kubectl -n kube-system exec etcd-{{ master }} -- etcdctl member add {{item}} http://{{item}}:2380"
+  environment: "{{kube_cfg_env}}"
+  delegate_to: "{{master}}"
+  register: result
+  changed_when: "'membership: peerURL exists' not in result.stderr"
+  failed_when: "result.rc and 'membership: peerURL exists' not in result.stderr"
+  until: "result == 0 or 'membership: peerURL exists' in result.stderr"
+  retries: 60
+  delay: 5
+  # serial: 1 would be the proper solution here, but that can only be set on play level
+  # upstream issue: https://github.com/ansible/ansible/issues/12170
+  run_once: true
+  with_items: "{{groups['masters'][1:]}}"

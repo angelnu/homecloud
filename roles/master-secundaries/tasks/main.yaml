@@ -1,18 +1,41 @@
-- name: Reset Kubernetes installation
-  shell: "kubeadm reset"
-  when: k8s_reset
+- name: Copy kubernetes certificates from primary master - {{K8S_ETC_PATH}}
+  synchronize:
+    dest: "{{K8S_ETC_PATH}}/"
+    src: ./kubeconfig/pki
+  when: not KUBELET_SELFHOST
 
-- name: Check Kubelet config file - {{kubelet_cfg_path}}
-  stat:
-    path: "{{kubelet_cfg_path}}"
-  register: kubelet_st
+- name: Create Kubernetes configuration
+  shell:
+    kubeadm alpha phase kubeconfig all
+    creates="{{K8S_ETC_PATH}}/kubelet.conf"
+  environment: "{{kube_cfg_env}}"
+  when: not KUBELET_SELFHOST
 
-- name: Initalizing secundary Kubernetes master
-  block:
-    - import_tasks: init.yaml
-      when: kubelet_st.stat.exists == False
-  rescue:
-    - name: Error initializing -> reset cluster
-      shell: "echo kubeadm reset" #TBD: remove echo
-    - fail:
-        msg: Partitially initisalised cluster deleted. Terminating now.
+- name: Create Kubernetes control plane
+  shell:
+    kubeadm alpha phase controlplane all {{KUBEADM_OPTS| default('')}}
+    creates="{{K8S_ETC_PATH}}/manifests/kube-apiserver.yaml"
+  environment: "{{kube_cfg_env}}"
+  when: not KUBELET_SELFHOST
+
+- name: Restart kubelet
+  service: name=kubelet enabled=yes state=restarted
+  changed_when: false
+
+
+
+- import_role: name=master-etcd
+
+- import_role: name=master-settle
+
+
+
+- name: Mark node as master
+  shell: "kubeadm alpha phase mark-master --node-name {{inventory_hostname}}"
+  environment: "{{kube_cfg_env}}"
+  delegate_to: "{{master}}"
+  register: result
+  when: "'master' not in last_k8s_node_info.stdout"
+
+- import_role: name=master-settle
+  when: result|changed
