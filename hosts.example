@@ -1,15 +1,10 @@
-[pis]
-master.cluster.local name=master.cluster.local
-node1.cluster.local name=node1.cluster.local
-node2.cluster.local name=node2.cluster.local
-node3.cluster.local name=node3.cluster.local
-node4.cluster.local name=node3.cluster.local
-
-[master]
-master.cluster.local
+[masters]
+#home.angelnu.com name=home.angelnu.com
+pi1.angelnu.com  name=pi1.angelnu.com
+pi2.angelnu.com  name=pi2.angelnu.com
+pi3.angelnu.com name=pi3.angelnu.com
 
 [nodes]
-node1.cluster.local
-node2.cluster.local
-node3.cluster.local
-node4.cluster.local
+
+[all:vars]
+ansible_user=root
