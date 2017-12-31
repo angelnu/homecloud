@@ -1,0 +1,80 @@
+---
+# ------------------- Deployment ------------------- #
+
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: ccu2
+  labels:
+    app: ccu2
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ccu2
+  template:
+    metadata:
+      labels:
+        app: ccu2
+    spec:
+      hostname: ccu2
+      containers:
+      - name: ccu2
+        image: angelnu/ccu2
+        env:
+          - name: PERSISTENT_DIR
+            value: "/mnt"
+          - name: CHECK_PERSISTENT_DIR
+            value: "y"
+        ports:
+        - containerPort: 80
+        - containerPort: 2001
+        livenessProbe:
+          tcpSocket:
+            port: 2001
+          initialDelaySeconds: 600
+          timeoutSeconds: 10
+        volumeMounts:
+        - mountPath: /mnt
+          name: ccu2-volume
+        - mountPath: /dev_org
+          name: dev-org-volume
+        - mountPath: /sys_org
+          name: sys-org-volume
+      volumes:
+        - name: ccu2-volume
+          hostPath:
+            path: /media/glusterfs/ccu2
+            type: Directory
+        - name: dev-org-volume
+          hostPath:
+            path: /dev
+            type: Directory
+        - name: sys-org-volume
+          hostPath:
+            path: /sys
+            type: Directory
+
+---
+# ------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: ccu2
+  name: ccu2
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    nodePort: 30080
+  - name: rfd
+    port: 2001
+    targetPort: 2001
+  type: NodePort
+  selector:
+    app: ccu2

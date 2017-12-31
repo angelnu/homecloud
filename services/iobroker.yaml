@@ -1,0 +1,85 @@
+---
+# ------------------- Deployment ------------------- #
+
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: iobroker
+  labels:
+    app: iobroker
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: iobroker
+  template:
+    metadata:
+      labels:
+        app: iobroker
+    spec:
+      hostname: iobroker
+      #hostNetwork: true
+      containers:
+      - name: iobroker
+        image: angelnu/iobroker
+        ports:
+        - containerPort: 8081
+        - containerPort: 8082
+        - containerPort: 8084
+        - containerPort: 6500
+        - containerPort: 6501
+        - containerPort: 6502
+        - containerPort: 6503
+        - containerPort: 6504
+        - containerPort: 6505
+        - containerPort: 30000
+        livenessProbe:
+          tcpSocket:
+            port: 8081
+          initialDelaySeconds: 60000
+          timeoutSeconds: 10
+        volumeMounts:
+        - mountPath: /opt/iobroker
+          name: iobroker-volume
+        - mountPath: /etc/timezone_host
+          name: timezone-volume
+      volumes:
+        - name: iobroker-volume
+          hostPath:
+            path: /media/glusterfs/iobroker
+            type: Directory
+        - name: timezone-volume
+          hostPath:
+            path: /etc/timezone
+            type: File
+
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: iobroker
+  name: iobroker
+spec:
+  ports:
+  - name: admin
+    port: 8081
+    targetPort: 8081
+    nodePort: 30081
+  - name: vis
+    port: 8082
+    targetPort: 8082
+    nodePort: 30082
+  - name: iosocket
+    port: 8084
+    targetPort: 8084
+    nodePort: 30084
+  - name: rfdclient
+    port: 30000
+  type: NodePort
+  selector:
+    app: iobroker

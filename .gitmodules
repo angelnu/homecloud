@@ -1,0 +1,3 @@
+[submodule "images/glusterfs"]
+	path = images/glusterfs
+	url = git@github.com:angelnu/kubernetes-glusterfs-server.git
