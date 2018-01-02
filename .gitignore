@@ -1,5 +1,3 @@
 *.retry
 kubeconfig
-config.yml
-hosts
 .remote-sync.json
