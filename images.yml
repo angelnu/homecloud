@@ -1,0 +1,5 @@
+- name: Build Images
+  hosts: build[0]
+  gather_facts: false
+  tasks:
+  - import_role: name=build-docker

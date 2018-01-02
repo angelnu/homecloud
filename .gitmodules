@@ -1,3 +1,6 @@
 [submodule "images/glusterfs"]
 	path = images/glusterfs
 	url = git@github.com:angelnu/kubernetes-glusterfs-server.git
+[submodule "images/iobroker"]
+	path = images/iobroker
+	url = git@github.com:angelnu/ioBroker.docker.git

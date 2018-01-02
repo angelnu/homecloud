@@ -24,7 +24,9 @@
 
 - name: Initialize Kubernetes cluster
   shell:
-    "kubeadm init {{KUBEADM_OPTS| default('')}} \
+    "kubeadm init \
+      {{KUBEADM_OPTS| default('')}} \
+      {{KUBEADM_OPTS_INIT| default('')}} \
       --node-name={{inventory_hostname}} \
       --apiserver-cert-extra-sans=127.0.0.1,\
         {% for host in groups['masters'] %}\

@@ -45,9 +45,9 @@ spec:
           name: sys-org-volume
       volumes:
         - name: ccu2-volume
-          hostPath:
-            path: /media/glusterfs/ccu2
-            type: Directory
+          glusterfs:
+            endpoints: glusterfs-storage
+            path: ccu2
         - name: dev-org-volume
           hostPath:
             path: /dev

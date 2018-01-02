@@ -4,7 +4,7 @@
 ---
 
 # You timezone
-timezone: "Europe/Madrid"
+timezone: "Europe/Berlin"
 
 # Base settings
 MASTER_VIP: 192.168.2.220
@@ -20,7 +20,9 @@ KUBELET_SELFHOST: false
 KUBELET_DYN_CONFIG_PATH: /var/lib/kubelet/config/dynamic
 KUBELET_CHECKPOINT_PATH: /etc/kubernetes/checkpoint
 KUBELET_OPTS:
- "--bootstrap-checkpoint-path={{KUBELET_CHECKPOINT_PATH}}"
+  "--bootstrap-checkpoint-path={{KUBELET_CHECKPOINT_PATH}}"
+KUBEADM_OPTS_INIT:
+  "--ignore-preflight-errors=SystemVerification" #Ignore btrfs
 #KUBEADM_OPTS:
 # "--feature-gates=HighAvailability=true\
 #  {{ ',SelfHosting=true,StoreCertsInSecrets=true' if KUBELET_SELFHOST else '' }}"

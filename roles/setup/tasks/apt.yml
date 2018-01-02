@@ -33,7 +33,4 @@
     name: "{{ item }}"
     force: yes
     state: present
-  with_items:
-    - docker-ce=17.09.1~ce-0~ubuntu
-    - kubeadm
-    - rsync
+  with_items: "{{PACKAGES}}"

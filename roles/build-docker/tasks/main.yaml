@@ -1,0 +1,22 @@
+- name: List known images to build
+  local_action:
+    module: find
+    paths: images
+    file_type: directory
+  register: result
+
+- name: Extract paths
+  set_fact:
+    sources: "{{result.files | map(attribute='path') | list}}"
+
+- name: Copy image to build server
+  synchronize:
+    dest: "{{item|dirname}}"
+    src: "{{item}}"
+  register: copy
+  with_items: "{{sources}}"
+
+- name: Build image
+  shell: "./{{item.1}}/build.sh"
+  when: copy.results[item.0]|changed
+  with_indexed_items: "{{sources}}"

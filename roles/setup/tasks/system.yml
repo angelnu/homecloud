@@ -46,6 +46,16 @@
   shell: "hostnamectl set-hostname {{ name }}"
   when: set_hostname.changed
 
+- name: Create timezone file
+  copy:
+    content: "{{ timezone }}"
+    dest: /etc/timezone
+  register: result
+
+- name: Enable new timezone
+  shell: dpkg-reconfigure -f noninteractive tzdata
+  when: result | changed
+
 # - name: Check for ld-linux-armhf.so.3
 #   stat: path=/lib/ld-linux-armhf.so.3
 #   register: ld

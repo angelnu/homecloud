@@ -1,5 +1,5 @@
 - name: "Resetting if required"
-  hosts: all
+  hosts: masters
   tasks:
     - import_role: name=reset
       when: K8S_RESET

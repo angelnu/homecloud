@@ -1,3 +1,8 @@
+timezone: "Europe/Berlin"
 ssh:
   pub_key_path: "~/.ssh/id_rsa.pub"
-timezone: "Etc/UTC"
+PACKAGES:
+  - docker-ce=17.09.*
+  - kubeadm=1.9*
+  - rsync
+  - glusterfs-client
