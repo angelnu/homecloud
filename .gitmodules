@@ -7,3 +7,6 @@
 [submodule "images/mdns-repeater"]
 	path = images/mdns-repeater
 	url = git@github.com:angelnu/docker-mdns-repeater.git
+[submodule "images/keepalived"]
+	path = images/keepalived
+	url = git@github.com:angelnu/docker-keepalived.git
