@@ -72,6 +72,9 @@ spec:
     port: 80
     targetPort: 80
     nodePort: 30080
+  - name: rega
+    port: 8181
+    targetPort: 8181
   - name: rfd
     port: 2001
     targetPort: 2001

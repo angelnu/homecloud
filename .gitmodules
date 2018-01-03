@@ -4,3 +4,6 @@
 [submodule "images/iobroker"]
 	path = images/iobroker
 	url = git@github.com:angelnu/ioBroker.docker.git
+[submodule "images/mdns-repeater"]
+	path = images/mdns-repeater
+	url = git@github.com:angelnu/docker-mdns-repeater.git

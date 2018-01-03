@@ -18,7 +18,6 @@ Here is the hardware you will need to complete the project:
 | 3 | [ODROID Power Supply](https://www.pollin.de/p/steckernetzteil-xing-yuan-xy-0504000-e-5-v-4-a-351773) | 3x 9,95 EUR |
 
 
-
 ## Setup
 
 ### Dependencies
@@ -52,6 +51,9 @@ Here is the hardware you will need to complete the project:
 1. `export KUBECONFIG=kubeconfig/admin.conf`
 2. `kubectl update -f services`
 
+## ToDos
+* Add multi-arch support
+* Ingress port
 
 
 ## References

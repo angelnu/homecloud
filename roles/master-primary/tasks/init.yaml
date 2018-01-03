@@ -29,6 +29,7 @@
       {{KUBEADM_OPTS_INIT| default('')}} \
       --node-name={{inventory_hostname}} \
       --apiserver-cert-extra-sans=127.0.0.1,\
+        {{KUBEADM_APISERVER_EXTRAHOSTS| default('')}}\
         {% for host in groups['masters'] %}\
           {{ hostvars[host].inventory_hostname }},\
           {{ hostvars[host].ansible_default_ipv4.address }}\
