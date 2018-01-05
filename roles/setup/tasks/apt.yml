@@ -34,3 +34,10 @@
     force: yes
     state: present
   with_items: "{{PACKAGES}}"
+
+- name: Remove Packages
+  apt:
+    name: "{{ item }}"
+    force: yes
+    state: absent
+  with_items: "{{PACKAGES2REMOVE}}"

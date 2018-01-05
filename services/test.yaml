@@ -12,13 +12,21 @@ spec:
       - sh
       - -c
       - while [ 1 ]; do sleep 10;done
+    env:
+    - name: nicName
+      valueFrom:
+        configMapKeyRef:
+          # The ConfigMap containing the value you want to assign to SPECIAL_LEVEL_KEY
+          name: host-nics
+          # Specify the key associated with the value
+          key: "$(n4.angelnu.com)"
     ports:
     - containerPort: 22
     volumeMounts:
-    - mountPath: /gluster
+    - mountPath: /iobroker-data
       name: gluster-volume
   volumes:
     - name: gluster-volume
       glusterfs:
         endpoints: glusterfs-storage
-        path: shared01
+        path: iobroker

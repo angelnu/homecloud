@@ -1,8 +1,7 @@
 [masters]
-#home.angelnu.com name=home.angelnu.com
-#pi1.angelnu.com  name=pi1.angelnu.com
-pi2.angelnu.com  name=pi2.angelnu.com
-pi3.angelnu.com name=pi3.angelnu.com
+n4.angelnu.com  name=n4.angelnu.com
+n5.angelnu.com  name=n5.angelnu.com
+n6.angelnu.com  name=n6.angelnu.com
 
 [workers]
 
@@ -12,7 +11,7 @@ workers
 
 [build]
 #home.angelnu.com  name=home.angelnu.com
-pi1.angelnu.com name=pi1.angelnu.com
+n6.angelnu.com name=n6.angelnu.com
 
 [all:vars]
 ansible_user=root

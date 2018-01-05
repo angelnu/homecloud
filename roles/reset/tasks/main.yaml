@@ -1,2 +1,17 @@
 - name: Reset Kubernetes installation
   shell: "kubeadm reset; rm -rf {{KUBELET_CHECKPOINT_PATH}}"
+
+- name: Remove Weave DB and plugins
+  shell: "rm -rf /var/lib/weave /opt/cni/bin/weave-*" #with_fileglob did not work:   https://github.com/ansible/ansible/issues/17136
+
+# - name: Reboot in order to reset
+#   shell: sleep 2 && shutdown -r now
+#   async: 1
+#   poll: 0
+# - name: Wait for server come back
+#   wait_for: >
+#     host={{ inventory_hostname }}
+#     port=22
+#     delay=15
+#     timeout=600
+#   delegate_to: localhost

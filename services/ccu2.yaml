@@ -81,3 +81,21 @@ spec:
   type: NodePort
   selector:
     app: ccu2
+
+
+---
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ccu2
+spec:
+  rules:
+  - host: homematic.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ccu2
+          servicePort: http
