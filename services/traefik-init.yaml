@@ -1,0 +1,80 @@
+# ------------------- ConfigMap ------------------- #
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: traefik-conf
+  namespace: kube-system
+data:
+  acme.json: "{}"
+  traefik.toml: |
+    # traefik.toml
+    debug = false
+    checkNewVersion = true
+    logLevel = "INFO"
+    InsecureSkipVerify = true
+    defaultEntryPoints = ["http","https"]
+    [entryPoints]
+      [entryPoints.http]
+      address = ":80"
+      #[entryPoints.http.redirect]
+      #entryPoint = "https"
+      [entryPoints.https]
+      address = ":443"
+      [entryPoints.https.tls]
+      MinVersion = "VersionTLS12"
+      CipherSuites = ["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA", "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA", "TLS_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA"]
+    [acme]
+      email = "acme@angelnu.com"
+      storage = "traefik/acme/account"
+      storageFile = "/config/acme.json"
+      entryPoint = "https"
+      acmeLogging = true
+      onHostRule = true
+      #onDemand = true
+      caServer = "https://acme-v01.api.letsencrypt.org/directory"
+      #caServer = "https://acme-staging.api.letsencrypt.org/directory"
+      [acme.dnsChallenge]
+        provider = "dnsmadeeasy"
+      [acme.httpChallenge]
+        entryPoint = "http"
+      #[[acme.domains]]
+        #main = "angelnu.com"
+    [etcd]
+    endpoint = "etcd-lb:2379"
+    watch = true
+    prefix = "/traefik"
+
+# ------------------- Job ------------------- #
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: traefik-kv-job
+  namespace: kube-system
+spec:
+  template:
+    metadata:
+      name: traefik-kv-jobs
+    spec:
+      containers:
+        - image: traefik:v1.5
+          name: traefik-ingress-lb
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: "/config"
+              name: "config"
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+            - containerPort: 8080
+          args:
+            - storeconfig
+            - --configfile=/config/traefik.toml
+            #- --etcd.useAPIV3=true
+      volumes:
+        - name: config
+          configMap:
+            name: traefik-conf
+            defaultMode: 0600
+      restartPolicy: OnFailure

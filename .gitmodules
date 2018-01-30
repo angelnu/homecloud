@@ -10,3 +10,6 @@
 [submodule "images/keepalived"]
 	path = images/keepalived
 	url = git@github.com:angelnu/docker-keepalived.git
+[submodule "images/ccu2"]
+	path = images/ccu2
+	url = git@github.com:angelnu/docker-ccu2.git

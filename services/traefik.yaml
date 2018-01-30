@@ -53,9 +53,7 @@ metadata:
   name: traefik
   namespace: kube-system
 
-
 # ------------------- DaemonSet ------------------- #
-
 ---
 kind: DaemonSet
 apiVersion: apps/v1
@@ -79,12 +77,15 @@ spec:
       terminationGracePeriodSeconds: 60
       hostNetwork: true
       containers:
-      - image: traefik
+      - image: traefik:v1.5
         name: traefik
         ports:
         - name: http
           containerPort: 80
           hostPort: 80
+        - name: https
+          containerPort: 443
+          hostPort: 443
         - name: admin
           containerPort: 8080
         securityContext:
@@ -93,7 +94,21 @@ spec:
         - -d
         - --web
         - --kubernetes
-
+        - --etcd
+        - --etcd.endPoint=etcd-lb:2379
+        - --etcd.useAPIV3=true
+        env:
+        - name: DNSMADEEASY_API_KEY
+          value: 8965f05b-63e7-4fd6-81ab-679a323f6f21
+        - name: DNSMADEEASY_API_SECRET
+          value: da133bb2-f5db-4589-9970-16b106f748b5
+      dnsPolicy: ClusterFirstWithHostNet
+      initContainers:
+      - image: busybox
+        name: waitforconfig
+        command:
+        - wget
+        - http://etcd-lb:2379/v2/keys/traefik/acme/account
 ---
 # ------------------- Service ------------------- #
 

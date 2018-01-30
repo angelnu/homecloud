@@ -3,9 +3,6 @@
 #
 ---
 
-# You timezone
-timezone: "Europe/Berlin"
-
 # Base settings
 MASTER_VIP: 192.168.2.220
 

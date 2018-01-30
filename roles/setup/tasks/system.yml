@@ -6,14 +6,14 @@
   shell: "hostnamectl set-hostname {{ name }}"
   when: set_hostname.changed
 
-- name: Create timezone file
+- name: "Write timezone file with {{ timezone }}"
   copy:
     content: "{{ timezone }}"
     dest: /etc/timezone
   register: result
 
 - name: Enable new timezone
-  shell: dpkg-reconfigure -f noninteractive tzdata
+  shell: "timedatectl set-timezone {{ timezone }}"
   when: result | changed
 
 
@@ -25,4 +25,22 @@
 
 
 - name: swap - disable swap
-  command: swapoff --all
+  shell: "cat /proc/swaps|tail -n +2 && swapoff --all"
+  register: result
+  changed_when: result.stdout_lines | length
+
+
+- name: Comment out the dnsmask
+  replace:
+    dest: /etc/NetworkManager/NetworkManager.conf
+    regexp: '^dns=dnsmasq'
+    replace: '#dns=dnsmasq'
+  register: result
+
+- name: Restart Network Manager
+  systemd:
+    name: network-manager
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+  when: result.changed
