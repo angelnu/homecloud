@@ -90,6 +90,8 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: ccu2
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
 spec:
   rules:
   - host: homematic.angelnu.com

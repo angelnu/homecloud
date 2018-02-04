@@ -1,26 +1,17 @@
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"labels":{"k8s-app":"kubernetes-dashboard"},"name":"kubernetes-dashboard","namespace":"kube-system"},"spec":{"ports":[{"port":443,"targetPort":8443}],"selector":{"k8s-app":"kubernetes-dashboard"}}}
-  creationTimestamp: 2018-01-06T18:29:05Z
   labels:
     k8s-app: kubernetes-dashboard
   name: kubernetes-dashboard
   namespace: kube-system
-  resourceVersion: "509"
-  selfLink: /api/v1/namespaces/kube-system/services/kubernetes-dashboard
-  uid: 79dc0332-f30f-11e7-9710-001e0630c87f
 spec:
-  clusterIP: 10.103.127.102
   ports:
   - port: 443
     protocol: TCP
     targetPort: 8443
   selector:
     k8s-app: kubernetes-dashboard
-  sessionAffinity: None
   type: NodePort
 status:
   loadBalancer: {}
@@ -49,6 +40,8 @@ kind: Ingress
 metadata:
   name: dashboard
   namespace: kube-system
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
 spec:
   rules:
   - host: dashboard.angelnu.com

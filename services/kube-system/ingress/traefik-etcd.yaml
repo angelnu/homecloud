@@ -63,6 +63,8 @@ spec:
           value: "3"
         - name: SET_NAME
           value: "etcd"
+        - name: ETCDCTL_API
+          value: "3"
         volumeMounts:
         - name: data
           mountPath: /var/run/etcd

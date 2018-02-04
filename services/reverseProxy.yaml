@@ -4,7 +4,7 @@ metadata:
   name: server
 spec:
   type: ExternalName
-  externalName: home.angelnu.com
+  externalName: server.home.angelnu.com
   ports:
   - name: http
     protocol: TCP
@@ -66,12 +66,32 @@ spec:
           servicePort: 32400
 
 ---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: server-home
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
+    #ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0, 88.130.75.63/16"
+spec:
+  rules:
+  - host: nextcloud.home.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: server
+          servicePort: 443
+---
 # ------------------- nas ------------------- #
 
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: nas
+  #annotations:
+  #  ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
 spec:
   rules:
   - host: nas.angelnu.com

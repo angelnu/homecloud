@@ -13,3 +13,6 @@
 [submodule "images/ccu2"]
 	path = images/ccu2
 	url = git@github.com:angelnu/docker-ccu2.git
+[submodule "images/smtp"]
+	path = images/smtp
+	url = git@github.com:angelnu/docker-smtp.git
