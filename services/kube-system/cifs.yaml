@@ -1,0 +1,67 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: flex-cifs
+  namespace: kube-system
+spec:
+  template:
+    metadata:
+      name: flex-cifs
+      namespace: kube-system
+      labels:
+        app: flex-cifs
+    spec:
+      containers:
+        - image: angelnu/cifs_k8s_plugin:latest
+          imagePullPolicy: Always
+          name: flex-cifs
+          securityContext:
+              privileged: true
+          args:
+            - /target
+          volumeMounts:
+            - mountPath: /target
+              name: flexvolume-mount
+      terminationGracePeriodSeconds: 2
+      volumes:
+        - name: flexvolume-mount
+          hostPath:
+            type: DirectoryOrCreate
+            path: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/angelnu~cifs
+
+---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: cifs-secret
+# type: angelnu/cifs
+# data:
+#   password: cmVwbGFjZU1l #replaceMe
+#   username: bmV4dGNsb3VkQGFuZ2VsbnUuY29t # nextcloud@angelnu.com
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: plop
+spec:
+  template:
+    metadata:
+      name: plop
+    spec:
+      containers:
+        - name: plop
+          image: "alpine:latest"
+          command: ["/bin/ls", "-lah", "/mnt"]
+          volumeMounts:
+            - mountPath: /mnt
+              name: video
+      restartPolicy: Never
+      volumes:
+        - name: video
+          flexVolume:
+            driver: "angelnu/cifs"
+            secretRef:
+              name: "cifs-secret"
+            options:
+              source: "//nas.home.angelnu.com/video"
+              mountOptions: "dir_mode=0755,file_mode=0644,noperm"
