@@ -17,6 +17,6 @@
   with_items: "{{sources}}"
 
 - name: Build image
-  shell: "./{{item.1}}/build.sh"
+  shell: "cd {{item.1}} && ./build.sh"
   when: copy.results[item.0]|changed
   with_indexed_items: "{{sources}}"
