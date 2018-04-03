@@ -16,3 +16,6 @@
 [submodule "images/smtp"]
 	path = images/smtp
 	url = git@github.com:angelnu/docker-smtp.git
+[submodule "images/cifs_plugin"]
+	path = images/cifs_plugin
+	url = git@github.com:angelnu/cifs_k8s_plugin.git
