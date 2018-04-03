@@ -11,6 +11,8 @@ spec:
   replicas: 1
   strategy:
     type: Recreate
+    maxUnavailable: 1
+    maxSurge: 0
   selector:
     matchLabels:
       app: ccu2
