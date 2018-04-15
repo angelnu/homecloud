@@ -36,6 +36,7 @@ spec:
 #   name: cifs-secret
 # type: angelnu/cifs
 # data:
+    # create with echo -n "admin" | base64
 #   password: cmVwbGFjZU1l #replaceMe
 #   username: bmV4dGNsb3VkQGFuZ2VsbnUuY29t # nextcloud@angelnu.com
 ---
