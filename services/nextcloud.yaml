@@ -1,0 +1,120 @@
+---
+# ------------------- Deployment ------------------- #
+
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: nextcloud
+  labels:
+    app: nextcloud
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nextcloud
+  template:
+    metadata:
+      labels:
+        app: nextcloud
+    spec:
+      containers:
+      - name: nextcloud
+        image: ownyourbits/nextcloudpi-armhf:latest
+        args:
+        - nextcloud2.home.angelnu.com
+        ports:
+        - containerPort: 443
+        - containerPort: 80
+        - containerPort: 4443 #admin console
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 600 # 10 minutes
+          timeoutSeconds: 10
+          failureThreshold: 12 # 2 minutes
+        volumeMounts:
+        - mountPath: /data
+          name: nextcloud-data
+          subPath: nextcloud
+        - mountPath: /software
+          name: software
+      volumes:
+        - name: nextcloud-data
+          persistentVolumeClaim:
+            claimName: nfs-kubernetes
+        - name: software
+          flexVolume:
+            driver: "angelnu/cifs"
+            secretRef:
+              name: "cifs-secret"
+            options:
+              source: "//nas.home.angelnu.com/software"
+              mountOptions: "dir_mode=0755,file_mode=0644,noperm"
+
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: nextcloud
+  name: nextcloud
+spec:
+  ports:
+  - name: https
+    port: 443
+    targetPort: 443
+  - name: http
+    port: 80
+    targetPort: 80
+  - name: admin
+    port: 4443
+    targetPort: 4443
+  type: NodePort
+  selector:
+    app: nextcloud
+
+---
+
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nextcloud
+spec:
+  rules:
+  - host: nextcloud.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nextcloud
+          servicePort: https
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nextcloud-home
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
+    #ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0, 88.130.75.63/16"
+spec:
+  rules:
+  - host: nextcloud.home.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nextcloud
+          servicePort: https
+  - host: admin.nextcloud.home.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nextcloud
+          servicePort: admin
