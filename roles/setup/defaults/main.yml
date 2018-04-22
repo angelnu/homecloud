@@ -6,6 +6,7 @@ PACKAGES:
   - kubeadm=1.9*
   - rsync
   - glusterfs-client
+  - nfs-common
   - attr
 PACKAGES2REMOVE:
   - zram-config
