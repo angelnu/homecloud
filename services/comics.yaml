@@ -1,0 +1,111 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: comics-scrapper
+spec:
+  template:
+    metadata:
+      name: comics-scrapper
+    spec:
+      containers:
+        - name: comics-scrapper
+          image: "angelnu/comics-arm:latest"
+          command: ["./getcomics_RSS.py"]
+          volumeMounts:
+            - mountPath: /data
+              name: comics
+      restartPolicy: Never
+      volumes:
+        - name: comics
+          flexVolume:
+            driver: "angelnu/cifs"
+            secretRef:
+              name: "cifs-secret"
+            options:
+              source: "//nas.home.angelnu.com/reading/tiras_comicas/RSS-scrapping"
+              mountOptions: "dir_mode=0755,file_mode=0644,noperm"
+---
+# ------------------- Deployment ------------------- #
+
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: comics-nginx
+  labels:
+    app: comics-nginx
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: comics-nginx
+  template:
+    metadata:
+      labels:
+        app: comics-nginx
+    spec:
+      containers:
+      - name: comics-nginx
+        image: nginx:alpine
+        env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 60 # 1 minutes
+          timeoutSeconds: 10
+          failureThreshold: 12 # 2 minutes
+        volumeMounts:
+          - mountPath: /usr/share/nginx/html
+            name: comics
+      volumes:
+        - name: comics
+          flexVolume:
+            driver: "angelnu/cifs"
+            secretRef:
+              name: "cifs-secret"
+            options:
+              source: "//nas.home.angelnu.com/reading/tiras_comicas/RSS-scrapping"
+              mountOptions: "ro,dir_mode=0755,file_mode=0644,noperm"
+
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: comics-nginx
+  name: comics-nginx
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  selector:
+    app: comics-nginx
+---
+
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: comics-nginx
+  annotations:
+    traefik.frontend.priority: "2"
+    traefik.frontend.rule.type: PathPrefixStrip
+spec:
+  rules:
+  - host: rss.angelnu.com
+    http:
+      paths:
+      - path: /scrapping/
+        backend:
+          serviceName: comics-nginx
+          servicePort: http

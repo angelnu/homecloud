@@ -23,7 +23,7 @@ spec:
       - name: nextcloud
         image: ownyourbits/nextcloudpi-armhf:latest
         args:
-        - nextcloud2.home.angelnu.com
+        - nextcloud.angelnu.com
         ports:
         - containerPort: 443
         - containerPort: 80
@@ -38,20 +38,20 @@ spec:
         - mountPath: /data
           name: nextcloud-data
           subPath: nextcloud
-        - mountPath: /software
-          name: software
+        # - mountPath: /software
+        #   name: software
       volumes:
         - name: nextcloud-data
           persistentVolumeClaim:
             claimName: nfs-kubernetes
-        - name: software
-          flexVolume:
-            driver: "angelnu/cifs"
-            secretRef:
-              name: "cifs-secret"
-            options:
-              source: "//nas.home.angelnu.com/software"
-              mountOptions: "dir_mode=0755,file_mode=0644,noperm"
+        # - name: software
+        #   flexVolume:
+        #     driver: "angelnu/cifs"
+        #     secretRef:
+        #       name: "cifs-secret"
+        #     options:
+        #       source: "//nas.home.angelnu.com/software"
+        #       mountOptions: "dir_mode=0755,file_mode=0644,noperm"
 
 ---
 # -------------------- Service ------------------- #

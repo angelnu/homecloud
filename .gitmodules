@@ -22,3 +22,6 @@
 [submodule "tt-rss"]
 	path = images/tt-rss
 	url = git@github.com:angelnu/docker-ttrss.git
+[submodule "comics"]
+	path = images/comics
+	url = git@github.com:angelnu/comics.git

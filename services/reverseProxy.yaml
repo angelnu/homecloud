@@ -50,7 +50,7 @@ spec:
         backend:
           serviceName: server
           servicePort: 443
-  - host: rss.angelnu.com
+  - host: old.rss.angelnu.com
     http:
       paths:
       - path: /
@@ -76,7 +76,7 @@ metadata:
     #ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0, 88.130.75.63/16"
 spec:
   rules:
-  - host: old.nextcloud.home.angelnu.com
+  - host: oldnextcloud.home.angelnu.com
     http:
       paths:
       - path: /

@@ -1,0 +1,91 @@
+---
+# ------------------- Secret ------------------- #
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ttrss-postgres-secret
+data:
+  # create with echo -n "admin" | base64
+  dbname: dHQtcnNz
+  username: dHQtcnNz #tt-rss
+  password: cGFzc3dvcmQ0cG9zdGdyZXM=
+---
+# ------------------- Deployment ------------------- #
+
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: ttrss-postgres
+  labels:
+    app: ttrss-postgres
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ttrss-postgres
+  template:
+    metadata:
+      labels:
+        app: ttrss-postgres
+    spec:
+      containers:
+      - name: ttrss-postgres
+        image: postgres:alpine
+        env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: ttrss-postgres-secret
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ttrss-postgres-secret
+              key: password
+        ports:
+        - containerPort: 5432
+        livenessProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: 600 # 10 minutes
+          timeoutSeconds: 10
+          failureThreshold: 12 # 2 minutes
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: nfs-kubernetes
+          subPath: ttrss/postgres
+        - mountPath: /software
+          name: software
+      volumes:
+        - name: nfs-kubernetes
+          persistentVolumeClaim:
+            claimName: nfs-kubernetes
+        - name: software
+          flexVolume:
+            driver: "angelnu/cifs"
+            secretRef:
+              name: "cifs-secret"
+            options:
+              source: "//nas.home.angelnu.com/software"
+              mountOptions: "dir_mode=0755,file_mode=0644,noperm"
+
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: ttrss-postgres
+  name: ttrss-postgres
+spec:
+  ports:
+  - name: db
+    port: 5432
+    targetPort: 5432
+  selector:
+    app: ttrss-postgres
