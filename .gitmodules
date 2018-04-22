@@ -19,3 +19,6 @@
 [submodule "images/cifs_plugin"]
 	path = images/cifs_plugin
 	url = git@github.com:angelnu/cifs_k8s_plugin.git
+[submodule "tt-rss"]
+	path = images/tt-rss
+	url = git@github.com:angelnu/docker-ttrss.git
