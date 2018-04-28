@@ -1,3 +1,25 @@
+# Logrotate
+- name: "Limit max log files to 1 MB each"
+  lineinfile:
+    path: /etc/logrotate.conf
+    insertbefore: BOF
+    line: maxsize 1M
+
+- name: "configure cron to run logrotate each 30 minutes"
+  copy:
+    content: "*/30 * * * * root /etc/cron.daily/logrotate"
+    dest: /etc/cron.d/extralogrotate
+  register: result
+
+- name: Restart cron service
+  systemd:
+    name: cron
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+  when: result | changed
+
+# Set hostname
 - name: Set hostname
   hostname: name="{{ name }}"
   register: set_hostname
@@ -6,6 +28,7 @@
   shell: "hostnamectl set-hostname {{ name }}"
   when: set_hostname.changed
 
+# Set timezone
 - name: "Write timezone file with {{ timezone }}"
   copy:
     content: "{{ timezone }}"
@@ -16,20 +39,19 @@
   shell: "timedatectl set-timezone {{ timezone }}"
   when: result | changed
 
-
+# Disable Swap
 - name: swap - remove current swaps from fstab
   lineinfile:
     dest: /etc/fstab
     regexp: '^/[\S]+\s+none\s+swap '
     state: absent
 
-
 - name: swap - disable swap
   shell: "cat /proc/swaps|tail -n +2 && swapoff --all"
   register: result
   changed_when: result.stdout_lines | length
 
-
+# disable local dns server
 - name: Comment out the dnsmask
   replace:
     dest: /etc/NetworkManager/NetworkManager.conf
@@ -43,4 +65,4 @@
     state: restarted
     enabled: yes
     daemon_reload: yes
-  when: result.changed
+  when: result | changed
