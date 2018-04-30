@@ -31,7 +31,6 @@ spec:
           value: rss.angelnu.com
         - name: TTRSS_PORT
           value: ""
-
         - name: DB_HOST
           value: ttrss-postgres
         - name: DB_PORT
@@ -56,9 +55,18 @@ spec:
         livenessProbe:
           tcpSocket:
             port: 8080
-          initialDelaySeconds: 600 # 10 minutes
+          initialDelaySeconds: 120 # 2 minutes
           timeoutSeconds: 10
-          failureThreshold: 12 # 2 minutes
+          failureThreshold: 6 # 1 minutes
+      initContainers:
+      - image: postgres:alpine
+        name: waitforpostgres
+        command:
+        - "pg_isready"
+        - "-h"
+        - "ttrss-postgres"
+        - "-p"
+        - "5432"
 
 ---
 # -------------------- Service ------------------- #

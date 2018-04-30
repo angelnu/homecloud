@@ -42,9 +42,9 @@ spec:
         livenessProbe:
           tcpSocket:
             port: 5432
-          initialDelaySeconds: 600 # 10 minutes
-          timeoutSeconds: 10
-          failureThreshold: 12 # 2 minutes
+          initialDelaySeconds: 60 # 1 minutes
+          timeoutSeconds: 5
+          failureThreshold: 6 # 30 seconds
         volumeMounts:
         - mountPath: /var/lib/postgresql/data
           name: nfs-kubernetes
