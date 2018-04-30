@@ -1,3 +1,21 @@
+# Add Kubernetes internal DNS server to host -> needed for glusterfs client to resolve nodes
+- name: "Add Kubernetes internal DNS to host resolv"
+  blockinfile:
+    path: /etc/resolvconf/resolv.conf.d/tail
+    block: |
+      options rotate
+      options timeout:1
+      nameserver 10.96.0.10
+  register: result
+
+- name: Restart resolvconf service
+  systemd:
+    name: resolvconf
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+  when: result | changed
+
 # Logrotate
 - name: "Limit max log files to 1 MB each"
   lineinfile:
@@ -7,8 +25,10 @@
 
 - name: "configure cron to run logrotate each 30 minutes"
   copy:
-    content: "*/30 * * * * root /etc/cron.daily/logrotate"
     dest: /etc/cron.d/extralogrotate
+    content: |
+      */30 * * * * root /etc/cron.daily/logrotate
+      
   register: result
 
 - name: Restart cron service
