@@ -1,3 +1,10 @@
+# Logrotate
+- name: "Enable Docker experimental cli (docker manifest)"
+  lineinfile:
+    path: .docker/config.json
+    insertafter: "^{"
+    line: '	"experimental": "enabled",'
+
 # Add Kubernetes internal DNS server to host -> needed for glusterfs client to resolve nodes
 - name: "Add Kubernetes internal DNS to host resolv"
   blockinfile:
@@ -28,7 +35,7 @@
     dest: /etc/cron.d/extralogrotate
     content: |
       */30 * * * * root /etc/cron.daily/logrotate
-      
+
   register: result
 
 - name: Restart cron service
