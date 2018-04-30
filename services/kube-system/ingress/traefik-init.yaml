@@ -16,36 +16,43 @@ data:
     defaultEntryPoints = ["http","https"]
     [entryPoints]
       [entryPoints.http]
-      address = ":80"
-      #whiteListSourceRange = ["127.0.0.1/32", "192.168.2.0/16"]
-      #[entryPoints.http.redirect]
-      #entryPoint = "https"
+        address = ":80"
+        #whiteListSourceRange = ["127.0.0.1/32", "192.168.2.0/16"]
+        #[entryPoints.http.redirect]
+        #entryPoint = "https"
       [entryPoints.https]
-      address = ":443"
-      #whiteListSourceRange = ["127.0.0.1/32", "192.168.2.0/16"]
-      [entryPoints.https.tls]
-      MinVersion = "VersionTLS12"
-      CipherSuites = ["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA", "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA", "TLS_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA"]
+        address = ":443"
+        #whiteListSourceRange = ["127.0.0.1/32", "192.168.2.0/16"]
+        [entryPoints.https.tls]
+          MinVersion = "VersionTLS12"
+          CipherSuites = ["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA", "TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA", "TLS_RSA_WITH_AES_128_GCM_SHA256", "TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA"]
     [acme]
       email = "acme@angelnu.com"
       storage = "traefik/acme/account"
-      storageFile = "/config/acme.json"
       entryPoint = "https"
       acmeLogging = true
-      onHostRule = true
-      #onDemand = true
-      caServer = "https://acme-v01.api.letsencrypt.org/directory"
-      #caServer = "https://acme-staging.api.letsencrypt.org/directory"
+      OnHostRule = true
+      #caServer = "https://acme-v02.api.letsencrypt.org/directory"
+      #caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
       [acme.dnsChallenge]
         provider = "dnsmadeeasy"
-      [acme.httpChallenge]
-        entryPoint = "http"
-      #[[acme.domains]]
-        #main = "angelnu.com"
+        #delayBeforeCheck = 0
+      #[acme.httpChallenge]
+      #  entryPoint = "http"
+      [[acme.domains]]
+        main = "*.angelnu.com"
+      [[acme.domains]]
+        main = "*.home.angelnu.com"
+      [[acme.domains]]
+        main = "*.auto.angelnu.com"
     [etcd]
-    endpoint = "etcd-lb:2379"
-    watch = true
-    prefix = "/traefik"
+      endpoint = "etcd-lb:2379"
+      watch = true
+      prefix = "/traefik"
+    [api]
+      entryPoint = "traefik"
+      dashboard = true
+      address = ":8080"
 
 # ------------------- Job ------------------- #
 ---
@@ -60,7 +67,7 @@ spec:
       name: traefik-kv-jobs
     spec:
       containers:
-        - image: traefik:v1.5
+        - image: traefik:1.5
           name: traefik-ingress-lb
           imagePullPolicy: Always
           volumeMounts:
@@ -73,7 +80,7 @@ spec:
           args:
             - storeconfig
             - --configfile=/config/traefik.toml
-            #- --etcd.useAPIV3=true
+            - --etcd.useAPIV3=true
       volumes:
         - name: config
           configMap:

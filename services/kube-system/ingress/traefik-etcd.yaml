@@ -48,11 +48,21 @@ spec:
       labels:
         app: "etcd"
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - etcd
+            topologyKey: "kubernetes.io/hostname"
       terminationGracePeriodSeconds: 2
       containers:
       - name: "etcd"
         #image: "quay.io/coreos/etcd:v3.2.3"
-        image: gcr.io/google_containers/etcd-arm:3.1.10
+        image: gcr.io/google_containers/etcd-arm:3.1.12
         ports:
         - containerPort: 2379
           name: client
@@ -69,8 +79,8 @@ spec:
           #After the first initialisation the STATE should be changes to existing
           #This is needed in case a node has to be removed and readded again
           #To clean up then go in a working node and do etcdctl member remove and then add
-          #value: "existing"
-          value: "new"
+          value: "existing"
+          #value: "new"
         volumeMounts:
         - name: data
           mountPath: /var/run/etcd
@@ -104,5 +114,7 @@ spec:
               --data-dir /var/run/etcd/default.etcd
       volumes:
       - name: data
-        emptyDir: {}
+        hostPath:
+          path: "/media/data/ingress-etcd"
+          type: DirectoryOrCreate
 ---
