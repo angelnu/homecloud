@@ -1,4 +1,4 @@
-# Logrotate
+# docker cli settings
 - name: "Enable Docker experimental cli (docker manifest)"
   lineinfile:
     path: .docker/config.json
