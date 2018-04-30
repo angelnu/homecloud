@@ -104,7 +104,7 @@ spec:
           value: da133bb2-f5db-4589-9970-16b106f748b5
       dnsPolicy: ClusterFirstWithHostNet
       initContainers:
-      - image: gcr.io/google_containers/etcd-arm:3.1.12
+      - image: angelnu/etcd:3.1.12
         name: waitforconfig
         env:
         - name: ETCDCTL_API

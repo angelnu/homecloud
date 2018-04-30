@@ -18,6 +18,8 @@ spec:
       labels:
         app: nextcloud
     spec:
+      nodeSelector:
+        beta.kubernetes.io/arch: arm
       containers:
       - name: nextcloud
         image: ownyourbits/nextcloudpi-armhf:latest

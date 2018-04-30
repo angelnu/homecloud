@@ -19,6 +19,8 @@ spec:
       labels:
         app: ttrss
     spec:
+      nodeSelector:
+        beta.kubernetes.io/arch: arm
       containers:
       - name: ttrss
         image: angelnu/ttrss-arm
@@ -53,7 +55,7 @@ spec:
         - containerPort: 8080
         livenessProbe:
           tcpSocket:
-            port: 80
+            port: 8080
           initialDelaySeconds: 600 # 10 minutes
           timeoutSeconds: 10
           failureThreshold: 12 # 2 minutes

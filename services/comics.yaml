@@ -12,6 +12,8 @@ spec:
         metadata:
           name: comics-scrapper
         spec:
+          nodeSelector:
+            beta.kubernetes.io/arch: arm
           containers:
             - name: comics-scrapper
               image: "angelnu/comics-arm:latest"

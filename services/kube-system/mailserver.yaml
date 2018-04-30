@@ -20,6 +20,8 @@ spec:
       labels:
         app: mailserver
     spec:
+      nodeSelector:
+        beta.kubernetes.io/arch: arm
       containers:
       - name: mailserver
         image: angelnu/docker-smtp-arm:latest

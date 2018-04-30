@@ -1,35 +1,26 @@
 ---
-# ------------------- Secret ------------------- #
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ttrss-postgres-secret
-data:
-  # create with echo -n "admin" | base64
-  dbname: dHQtcnNz
-  username: dHQtcnNz #tt-rss
-  password: cGFzc3dvcmQ0cG9zdGdyZXM=
----
 # ------------------- Deployment ------------------- #
 
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
-kind: Deployment
+apiVersion: apps/v1beta1
+kind: StatefulSet
 metadata:
   name: ttrss-postgres
-  labels:
-    app: ttrss-postgres
 spec:
+  serviceName: ttrss-postgres
+  # changing replicas value will require a manual etcdctl member remove/add
+  # command (remove before decreasing and add after increasing)
   replicas: 1
-  strategy:
-    type: Recreate
-  selector:
-    matchLabels:
-      app: ttrss-postgres
+  updateStrategy:
+    type: OnDelete
   template:
     metadata:
+      name: ttrss-postgres
       labels:
         app: ttrss-postgres
     spec:
+      #NOTE: it is not possible to open an 32 bit created DB into a 64 bit OS.
+      nodeSelector:
+        beta.kubernetes.io/arch: arm
       containers:
       - name: ttrss-postgres
         image: postgres:alpine
@@ -58,20 +49,10 @@ spec:
         - mountPath: /var/lib/postgresql/data
           name: nfs-kubernetes
           subPath: ttrss/postgres
-        - mountPath: /software
-          name: software
       volumes:
         - name: nfs-kubernetes
           persistentVolumeClaim:
             claimName: nfs-kubernetes
-        - name: software
-          flexVolume:
-            driver: "angelnu/cifs"
-            secretRef:
-              name: "cifs-secret"
-            options:
-              source: "//nas.home.angelnu.com/software"
-              mountOptions: "dir_mode=0755,file_mode=0644,noperm"
 
 ---
 # -------------------- Service ------------------- #

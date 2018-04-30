@@ -18,6 +18,8 @@ spec:
         k8s-app: heapster
     spec:
       serviceAccountName: heapster
+      nodeSelector:
+        beta.kubernetes.io/arch: arm
       containers:
       - name: heapster
         image: k8s.gcr.io/heapster-arm:v1.4.2

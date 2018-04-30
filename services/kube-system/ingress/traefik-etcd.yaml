@@ -59,6 +59,8 @@ spec:
                 - etcd
             topologyKey: "kubernetes.io/hostname"
       terminationGracePeriodSeconds: 2
+      nodeSelector:
+        beta.kubernetes.io/arch: arm
       containers:
       - name: "etcd"
         #image: "quay.io/coreos/etcd:v3.2.3"

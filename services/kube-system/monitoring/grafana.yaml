@@ -11,6 +11,8 @@ spec:
         task: monitoring
         k8s-app: grafana
     spec:
+      nodeSelector:
+        beta.kubernetes.io/arch: arm
       containers:
       - name: grafana
         image: k8s.gcr.io/heapster-grafana-arm:v4.4.3

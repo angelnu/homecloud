@@ -11,6 +11,8 @@ spec:
       labels:
         app: flex-cifs
     spec:
+      nodeSelector:
+        beta.kubernetes.io/arch: arm
       containers:
         - image: angelnu/cifs_k8s_plugin:latest
           imagePullPolicy: Always

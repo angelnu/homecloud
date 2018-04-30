@@ -17,6 +17,8 @@ spec:
       labels:
         app: ccu2
     spec:
+      nodeSelector:
+        beta.kubernetes.io/arch: arm
       containers:
       - name: ccu2
         image: angelnu/ccu2
@@ -28,11 +30,11 @@ spec:
         ports:
         - containerPort: 80
         - containerPort: 2001
-        livenessProbe:
-          tcpSocket:
-            port: 2001
-          initialDelaySeconds: 600
-          timeoutSeconds: 10
+        # livenessProbe:
+        #   tcpSocket:
+        #     port: 2001
+        #   initialDelaySeconds: 600
+        #   timeoutSeconds: 10
         volumeMounts:
         - mountPath: /mnt
           name: ccu2-volume

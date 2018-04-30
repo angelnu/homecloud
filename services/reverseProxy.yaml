@@ -23,15 +23,19 @@ spec:
 kind: "Service"
 apiVersion: "v1"
 metadata:
-  name: server-plex
+  name: nas
 spec:
   type: ExternalName
-  externalName: 192.168.2.3
+  externalName: nas.home.angelnu.com
   ports:
-  - name: plex
+  - name: http
     protocol: TCP
-    port: 32400
-    targetPort: 32400
+    port: 80
+    targetPort: 80
+  - name: https
+    protocol: TCP
+    port: 443
+    targetPort: 443
 
 
 ---
@@ -43,20 +47,6 @@ metadata:
   name: server
 spec:
   rules:
-  - host: old.nextcloud.angelnu.com
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: server
-          servicePort: 443
-  - host: old.rss.angelnu.com
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: server
-          servicePort: 443
   - host: plex.angelnu.com
     http:
       paths:
