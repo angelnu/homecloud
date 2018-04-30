@@ -13,8 +13,22 @@
                     {% endif %}\
                   {% endfor %}"
 
-- name: Write etcd config file
-  template: src=etcd.yaml dest={{etcd_cfg_path}} group=root owner=root mode=0700
+- name: "Modify etcd config to add peer"
+  blockinfile:
+    path: "{{etcd_cfg_path}}"
+    insertafter: "- etcd"
+    content: |
+      #Added lines
+          - --name
+          - {{ inventory_hostname }}
+          - --listen-peer-urls
+          - http://{{ ansible_default_ipv4.address }}:2380
+          - --initial-advertise-peer-urls
+          - http://{{ ansible_default_ipv4.address }}:2380
+          - --initial-cluster-state
+          - existing
+          - --initial-cluster
+          - {{ added_etcd }}
   register: update_etc_result
 
 # - name: Restart Kubelet

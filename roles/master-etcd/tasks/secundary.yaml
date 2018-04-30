@@ -7,13 +7,13 @@
 #     status_code: 201
 #     body_format: json
 - name: Add etcd peer to exisiting etcd cluster
-  shell: "kubectl -n kube-system exec etcd-{{ master }} -- etcdctl member add {{item}} http://{{item}}:2380"
+  shell: "kubectl -n kube-system exec etcd-{{ master }} -- /bin/sh -ec '{{ ETCD_BIN }} member add {{item}} --peer-urls=http://{{item}}:2380'"
   environment: "{{kube_cfg_env}}"
   delegate_to: "{{master}}"
   register: result
-  changed_when: "'membership: peerURL exists' not in result.stderr"
-  failed_when: "result.rc and 'membership: peerURL exists' not in result.stderr"
-  until: "result == 0 or 'membership: peerURL exists' in result.stderr"
+  changed_when: "'Peer URLs already exists' not in result.stderr"
+  failed_when: "result.rc and 'Peer URLs already exists' not in result.stderr"
+  until: "result == 0 or 'Peer URLs already exists' in result.stderr"
   retries: 60
   delay: 5
   # serial: 1 would be the proper solution here, but that can only be set on play level

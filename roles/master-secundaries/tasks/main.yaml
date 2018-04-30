@@ -1,3 +1,9 @@
+- name: Create etcd configuration
+  shell:
+    kubeadm alpha phase etcd local
+    creates="{{K8S_ETC_PATH}}/manifests/etcd.yaml"
+  environment: "{{kube_cfg_env}}"
+
 - name: Copy kubernetes certificates from primary master - {{K8S_ETC_PATH}}
   synchronize:
     dest: "{{K8S_ETC_PATH}}/"

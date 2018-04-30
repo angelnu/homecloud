@@ -15,7 +15,7 @@
 #   delay: 5
 
 - name: "Change peer URL for master etcd"
-  shell: "kubectl -n kube-system exec etcd-{{inventory_hostname}} -- etcdctl member update {{ ETCD_FIRST_PEER }} http://{{inventory_hostname}}:2380"
+  shell: "kubectl -n kube-system exec etcd-{{inventory_hostname}} -- /bin/sh -ec '{{ ETCD_BIN }}  member update {{ ETCD_FIRST_PEER }} --peer-urls=http://{{inventory_hostname}}:2380'"
   environment: "{{kube_cfg_env}}"
   when: update_etc_result.changed
   register: result
