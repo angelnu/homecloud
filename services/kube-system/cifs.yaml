@@ -30,16 +30,6 @@ spec:
             path: /usr/libexec/kubernetes/kubelet-plugins/volume/exec/angelnu~cifs
 
 ---
-# apiVersion: v1
-# kind: Secret
-# metadata:
-#   name: cifs-secret
-# type: angelnu/cifs
-# data:
-    # create with echo -n "admin" | base64
-#   password: cmVwbGFjZU1l #replaceMe
-#   username: bmV4dGNsb3VkQGFuZ2VsbnUuY29t # nextcloud@angelnu.com
----
 apiVersion: batch/v1
 kind: Job
 metadata:
