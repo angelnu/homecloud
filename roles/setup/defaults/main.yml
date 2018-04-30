@@ -2,11 +2,12 @@ timezone: "Europe/Berlin"
 ssh:
   pub_key_path: "~/.ssh/id_rsa.pub"
 PACKAGES:
-  - docker-ce=17.09.*
-  - kubeadm=1.9*
+  - docker-ce=18.03.*
+  - kubeadm=1.10*
   - rsync
   - glusterfs-client
   - nfs-common
   - attr
 PACKAGES2REMOVE:
   - zram-config
+  - sendmail-base
