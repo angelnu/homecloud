@@ -1,21 +1,20 @@
 ---
-# ------------------- Deployment ------------------- #
+# ------------------- StatefulSet ------------------- #
 
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
-kind: Deployment
+apiVersion: apps/v1beta1
+kind: StatefulSet
 metadata:
   name: nextcloud
-  labels:
-    app: nextcloud
 spec:
+  serviceName: nextcloud
+  # changing replicas value will require a manual etcdctl member remove/add
+  # command (remove before decreasing and add after increasing)
   replicas: 1
-  strategy:
-    type: Recreate
-  selector:
-    matchLabels:
-      app: nextcloud
+  updateStrategy:
+    type: OnDelete
   template:
     metadata:
+      name: nextcloud
       labels:
         app: nextcloud
     spec:
@@ -101,7 +100,6 @@ metadata:
   name: nextcloud-home
   annotations:
     ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
-    #ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0, 88.130.75.63/16"
 spec:
   rules:
   - host: nextcloud.home.angelnu.com
@@ -111,7 +109,7 @@ spec:
         backend:
           serviceName: nextcloud
           servicePort: https
-  - host: admin.nextcloud.home.angelnu.com
+  - host: adminnextcloud.home.angelnu.com
     http:
       paths:
       - path: /
