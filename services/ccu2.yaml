@@ -1,27 +1,22 @@
 ---
-# ------------------- Deployment ------------------- #
-
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
-kind: Deployment
+# ------------------- StatefulSet ------------------- #
+apiVersion: apps/v1beta1
+kind: StatefulSet
 metadata:
   name: ccu2
-  labels:
-    app: ccu2
 spec:
+  serviceName: ccu2
+  # changing replicas value will require a manual etcdctl member remove/add
+  # command (remove before decreasing and add after increasing)
   replicas: 1
-  strategy:
-    type: Recreate
-    maxUnavailable: 1
-    maxSurge: 0
-  selector:
-    matchLabels:
-      app: ccu2
+  updateStrategy:
+    type: OnDelete
   template:
     metadata:
+      name: ccu2
       labels:
         app: ccu2
     spec:
-      hostname: ccu2
       containers:
       - name: ccu2
         image: angelnu/ccu2
