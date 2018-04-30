@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cifs-secret
+type: angelnu/cifs
+data:
+  #create with echo -n "admin" | base64
+  password: cmVwbGFjZU1l #replaceMe
+  username: Y2lmc1VzZXI= # cifsUser
