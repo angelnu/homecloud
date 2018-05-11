@@ -1,0 +1,34 @@
+sudo: required
+
+services:
+ - docker
+
+language: bash
+
+env:
+  matrix:
+  - TARGET="angelnu/etcd:3.1.12"
+    SOURCE_amd64="gcr.io/google_containers/etcd-amd64:3.1.12"
+    SOURCE_arm64="gcr.io/google_containers/etcd-arm64:3.1.12"
+    SOURCE_arm="gcr.io/google_containers/etcd-arm:3.1.12"
+  - TARGET="angelnu/kube-proxy:v1.10.2"
+    SOURCE_amd64="gcr.io/google_containers/kube-proxy-amd64:v1.10.2"
+    SOURCE_arm64="gcr.io/google_containers/kube-proxy-arm64:v1.10.2"
+    SOURCE_arm="gcr.io/google_containers/kube-proxy-arm:v1.10.2"
+  - TARGET="angelnu/nextcloudplus:latest"
+    ARCHS="arm amd64"
+    SOURCE_amd64="ownyourbits/nextcloudplus-x86:latest"
+    SOURCE_arm="ownyourbits/nextcloudplus-armhf:latest"
+  - TARGET="angelnu/transmission:latest"
+    SOURCE_amd64="linuxserver/transmission:latest"
+    SOURCE_arm64="lsioarmhf/transmission-aarch64:latest"
+    SOURCE_arm="lsioarmhf/transmission:latest"
+
+
+script:
+- sudo apt-get install "docker-ce=18.03*"
+- mkdir -p $HOME/.docker
+- >
+  echo '{"experimental": "enabled"}'>$HOME/.docker/config.json
+- docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
+- ./build/build_manifest.sh
