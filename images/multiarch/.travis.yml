@@ -7,6 +7,10 @@ language: bash
 
 env:
   matrix:
+  - TARGET="angelnu/openvpn-client:latest"
+    SOURCE_amd64="dperson/openvpn-client:latest"
+    SOURCE_arm64="dperson/openvpn-client:aarch64"
+    SOURCE_arm="dperson/openvpn-client:armhf"
   - TARGET="angelnu/etcd:3.1.12"
     SOURCE_amd64="gcr.io/google_containers/etcd-amd64:3.1.12"
     SOURCE_arm64="gcr.io/google_containers/etcd-arm64:3.1.12"
@@ -23,6 +27,18 @@ env:
     SOURCE_amd64="linuxserver/transmission:latest"
     SOURCE_arm64="lsioarmhf/transmission-aarch64:latest"
     SOURCE_arm="lsioarmhf/transmission:latest"
+  - TARGET="angelnu/sickrage:latest"
+    SOURCE_amd64="linuxserver/sickrage:latest"
+    SOURCE_arm64="lsioarmhf/sickrage-aarch64:latest"
+    SOURCE_arm="lsioarmhf/sickrage:latest"
+  - TARGET="angelnu/heimdall:latest"
+    SOURCE_amd64="linuxserver/heimdall:latest"
+    SOURCE_arm64="lsioarmhf/heimdall-aarch64:latest"
+    SOURCE_arm="lsioarmhf/heimdall:latest"
+  - TARGET="angelnu/couchpotato:latest"
+    SOURCE_amd64="linuxserver/couchpotato:latest"
+    SOURCE_arm64="lsioarmhf/couchpotato-aarch64:latest"
+    SOURCE_arm="lsioarmhf/couchpotato:latest"
 
 
 script:
