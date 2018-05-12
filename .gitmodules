@@ -25,3 +25,6 @@
 [submodule "comics"]
 	path = images/comics
 	url = git@github.com:angelnu/comics.git
+[submodule "images/multiarch"]
+	path = images/multiarch
+	url = git@github.com:angelnu/docker-multiarch.git
