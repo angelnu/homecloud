@@ -1,3 +1,4 @@
+# ------------------- CronJob ------------------- #
 ---
 apiVersion: batch/v1beta1
 kind: CronJob
@@ -10,14 +11,21 @@ spec:
     spec:
       template:
         metadata:
-          name: comics-scrapper
+          name: comics-scrapper:latest
         spec:
-          nodeSelector:
-            beta.kubernetes.io/arch: arm
           containers:
             - name: comics-scrapper
-              image: "angelnu/comics-arm:latest"
-              command: ["./getcomics_RSS.py"]
+              image: "angelnu/comics:latest"
+              imagePullPolicy: Always
+              command:
+              - ./getcomics_RSS.py
+              resources:
+                requests:
+                  memory: "10Mi"
+                  cpu: "5m"
+                limits:
+                  #memory: "128Mi"
+                  #cpu: "500m"
               volumeMounts:
                 - mountPath: /data
                   name: comics
@@ -30,10 +38,52 @@ spec:
                   name: "cifs-secret"
                 options:
                   source: "//nas.home.angelnu.com/reading/tiras_comicas/RSS-scrapping"
-                  mountOptions: "dir_mode=0755,file_mode=0644,noperm"
+                  mountOptions: "dir_mode=0755,file_mode=0755,noperm"
 ---
-# ------------------- Deployment ------------------- #
-
+# ------------------- Test Job ------------------- #
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: comics-scrapper-test
+spec:
+  template:
+    metadata:
+      name: comics-scrapper-test
+      labels:
+        app: comics-scrapper-bash
+    spec:
+      containers:
+      - name: comics-scrapper-bash
+        image: angelnu/comics:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "5Mi"
+            cpu: "2m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
+        command:
+          - sh
+          - -c
+          - while [ 1 ]; do sleep 10;done
+        volumeMounts:
+          - mountPath: /data
+            name: comics
+      restartPolicy: OnFailure
+      terminationGracePeriodSeconds: 1
+      volumes:
+        - name: comics
+          flexVolume:
+            driver: "angelnu/cifs"
+            secretRef:
+              name: "cifs-secret"
+            options:
+              source: "//nas.home.angelnu.com/reading/tiras_comicas/RSS-scrapping"
+              mountOptions: "dir_mode=0755,file_mode=0755,noperm"
+---
+# ------------------- NGINX Deployment ------------------- #
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
@@ -55,6 +105,14 @@ spec:
       containers:
       - name: comics-nginx
         image: nginx:alpine
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "3Mi"
+            cpu: "2m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
         env:
         - name: PGDATA
           value: /var/lib/postgresql/data
@@ -76,7 +134,7 @@ spec:
             secretRef:
               name: "cifs-secret"
             options:
-              source: "//nas.home.angelnu.com/reading/tiras_comicas/RSS-scrapping"
+              source: "//nas.home.angelnu.com/reading/tiras_comicas/RSS-scrapping/feeds"
               mountOptions: "ro,dir_mode=0755,file_mode=0644,noperm"
 
 ---

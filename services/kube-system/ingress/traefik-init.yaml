@@ -45,6 +45,8 @@ data:
         main = "*.home.angelnu.com"
       [[acme.domains]]
         main = "*.auto.angelnu.com"
+      [[acme.domains]]
+        main = "*.nunez-gregoire.eu"
     [etcd]
       endpoint = "etcd-lb:2379"
       watch = true
@@ -64,26 +66,29 @@ metadata:
 spec:
   template:
     metadata:
-      name: traefik-kv-jobs
+      name: traefik-kv-job
     spec:
       containers:
-        - image: traefik:1.5
-          name: traefik-ingress-lb
-          imagePullPolicy: Always
-          volumeMounts:
-            - mountPath: "/config"
-              name: "config"
-          ports:
-            - containerPort: 80
-            - containerPort: 443
-            - containerPort: 8080
-          args:
-            - storeconfig
-            - --configfile=/config/traefik.toml
-            - --etcd.useAPIV3=true
+      - name: traefik-ingress-lb
+        #image: traefik:latest
+        imagePullPolicy: Always
+        image: alpine
+        imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: "/config"
+            name: "config"
+        ports:
+          - containerPort: 80
+          - containerPort: 443
+          - containerPort: 8080
+        args:
+          - ls
+          #- storeconfig
+          #- --configfile=/config/traefik.toml
+          #- --etcd.useAPIV3=true
       volumes:
-        - name: config
-          configMap:
-            name: traefik-conf
-            defaultMode: 0600
+      - name: config
+        configMap:
+          name: traefik-conf
+          defaultMode: 0600
       restartPolicy: OnFailure

@@ -20,19 +20,33 @@ spec:
       labels:
         app: mailserver
     spec:
-      nodeSelector:
-        beta.kubernetes.io/arch: arm
       containers:
       - name: mailserver
-        image: angelnu/docker-smtp-arm:latest
+        image: angelnu/exim:latest
+        imagePullPolicy: Always
+        command:
+        - "/bin/sh"
+        - "-ec"
+        - |
+          while [ 1 ]; do sleep 2;done
         imagePullPolicy: Always
         ports:
         - containerPort: 25
         env:
         - name: RELAY_NETWORKS
-          value: ":192.168.0.0/16"
+          value: ":192.168.0.0/16:10.0.0.0/8"
         - name: MAILNAME
           value: server.angelnu.com
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                    - mailserver
+              topologyKey: "kubernetes.io/hostname"
 
 ---
 kind: Service

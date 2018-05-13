@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transmission
+spec:
+  selector:
+    matchLabels:
+      app: transmission
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: transmission
+      labels:
+        app: transmission
+    spec:
+      hostname: transmission
+      containers:
+      - name: transmission
+        image: angelnu/transmission:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "2000Mi"
+            cpu: "25m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
+        ports:
+        - containerPort: 9091
+        env:
+        - name: TZ
+          value: Europe/Berlin
+        volumeMounts:
+        - mountPath: /config
+          name: config
+          subPath: transmission/config
+        - mountPath: /downloads
+          name: data
+        - mountPath: /watch
+          name: data
+          subPath: watch
+        - name: resolv #VPN
+          mountPath: /etc/resolv.conf
+          subPath: resolv.conf
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: nfs-kubernetes
+      - name: data
+        flexVolume:
+          driver: "angelnu/cifs"
+          secretRef:
+            name: "cifs-secret"
+          options:
+            source: "//nas.home.angelnu.com/downloads/downloaders/transmission"
+            mountOptions: "dir_mode=0775,file_mode=0664,noperm"
+
+# VPN boiler-plate
+      - name: resolv
+        emptyDir: {}
+      initContainers:
+      - name: vxlan
+        #image: armhf/alpine:latest
+        image: angelnu/openvpn-helper
+        imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        volumeMounts:
+        - name: resolv
+          mountPath: /etc_shared
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: transmission
+  name: transmission
+spec:
+  clusterIP: None
+  ports:
+  - name: http
+    port: 80
+    targetPort: 9091
+  selector:
+    app: transmission
+---
+
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: transmission
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
+spec:
+  rules:
+  - host: torrent.home.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: transmission
+          servicePort: http

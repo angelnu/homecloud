@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jackett
+spec:
+  selector:
+    matchLabels:
+      app: jackett
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: jackett
+      labels:
+        app: jackett
+    spec:
+      hostname: jackett
+      containers:
+      - name: jackett
+        image: angelnu/jackett
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "115Mi"
+            cpu: "800m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
+        ports:
+        - containerPort: 9117
+        env:
+        - name: TZ
+          value: Europe/Berlin
+        volumeMounts:
+        - mountPath: /config
+          name: config
+          subPath: jackett/config
+        - mountPath: /downloads
+          name: data
+        - name: resolv #VPN
+          mountPath: /etc/resolv.conf
+          subPath: resolv.conf
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: nfs-kubernetes
+      - name: data
+        flexVolume:
+          driver: "angelnu/cifs"
+          secretRef:
+            name: "cifs-secret"
+          options:
+            source: "//nas.home.angelnu.com/downloads/downloaders/transmission/watch"
+            mountOptions: "dir_mode=0775,file_mode=0664,noperm"
+
+# VPN boiler-plate
+      - name: resolv
+        emptyDir: {}
+      initContainers:
+      - name: vxlan
+        #image: armhf/alpine:latest
+        image: angelnu/openvpn-helper
+        imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        volumeMounts:
+        - name: resolv
+          mountPath: /etc_shared
+
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: jackett
+  name: jackett
+spec:
+  clusterIP: None
+  ports:
+  - name: http
+    port: 80
+    targetPort: 9117
+  selector:
+    app: jackett
+---
+
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jackett
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
+spec:
+  rules:
+  - host: search.home.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: jackett
+          servicePort: http

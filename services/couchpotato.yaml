@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: couchpotato
+spec:
+  selector:
+    matchLabels:
+      app: couchpotato
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: couchpotato
+      labels:
+        app: couchpotato
+    spec:
+      hostname: couchpotato
+      containers:
+      - name: couchpotato
+        image: angelnu/couchpotato:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "70Mi"
+            cpu: "15m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
+        ports:
+        - containerPort: 5050
+        env:
+        - name: TZ
+          value: Europe/Berlin
+        volumeMounts:
+        - mountPath: /config
+          name: config
+          subPath: couchpotato/config
+        - mountPath: /downloads
+          name: data
+        - mountPath: /movies
+          name: data
+          subPath: 1_films
+        - mountPath: /videos
+          name: videos
+        - name: resolv #VPN
+          mountPath: /etc/resolv.conf
+          subPath: resolv.conf
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: nfs-kubernetes
+      - name: data
+        flexVolume:
+          driver: "angelnu/cifs"
+          secretRef:
+            name: "cifs-secret"
+          options:
+            source: "//nas.home.angelnu.com/downloads"
+            mountOptions: "dir_mode=0775,file_mode=0664,noperm"
+      - name: videos
+        flexVolume:
+          driver: "angelnu/cifs"
+          secretRef:
+            name: "cifs-secret"
+          options:
+            source: "//nas.home.angelnu.com/video"
+            mountOptions: "dir_mode=0775,file_mode=0664,noperm"
+
+
+# VPN boiler-plate
+      - name: resolv
+        emptyDir: {}
+      initContainers:
+      - name: vxlan
+        #image: armhf/alpine:latest
+        image: angelnu/openvpn-helper
+        imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        volumeMounts:
+        - name: resolv
+          mountPath: /etc_shared
+
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: couchpotato
+  name: couchpotato
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 5050
+  selector:
+    app: couchpotato
+---
+
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: couchpotato
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
+spec:
+  rules:
+  - host: movies.home.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: couchpotato
+          servicePort: http

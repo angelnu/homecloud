@@ -1,3 +1,5 @@
+# ------------------- server-appache ------------------- #
+
 kind: "Service"
 apiVersion: "v1"
 metadata:
@@ -20,26 +22,6 @@ spec:
     targetPort: 32400
 
 ---
-kind: "Service"
-apiVersion: "v1"
-metadata:
-  name: nas
-spec:
-  type: ExternalName
-  externalName: nas.home.angelnu.com
-  ports:
-  - name: http
-    protocol: TCP
-    port: 80
-    targetPort: 80
-  - name: https
-    protocol: TCP
-    port: 443
-    targetPort: 443
-
-
----
-# ------------------- server-appache ------------------- #
 
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -76,15 +58,39 @@ spec:
 ---
 # ------------------- nas ------------------- #
 
+kind: "Service"
+apiVersion: "v1"
+metadata:
+  name: nas
+spec:
+  type: ExternalName
+  externalName: nas.home.angelnu.com
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  - name: https
+    protocol: TCP
+    port: 443
+    targetPort: 443
+
+---
+
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: nas
-  #annotations:
-  #  ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
 spec:
   rules:
   - host: nas.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nas
+          servicePort: 443
+  - host: nas.nunez-gregoire.eu
     http:
       paths:
       - path: /

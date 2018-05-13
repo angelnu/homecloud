@@ -28,3 +28,9 @@
 [submodule "images/multiarch"]
 	path = images/multiarch
 	url = git@github.com:angelnu/docker-multiarch.git
+[submodule "images/apache-webdav"]
+	path = images/apache-webdav
+	url = git@github.com:angelnu/docker-apache-webdav.git
+[submodule "images/openvpn-helper"]
+	path = images/openvpn-helper
+	url = git@github.com:angelnu/docker-openvpn-helper.git

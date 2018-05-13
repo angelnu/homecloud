@@ -11,11 +11,16 @@ spec:
       labels:
         app: flex-cifs
     spec:
-      nodeSelector:
-        beta.kubernetes.io/arch: arm
       containers:
         - image: angelnu/cifs_k8s_plugin:latest
           imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "3Mi"
+              cpu: "1m"
+            limits:
+              #memory: "128Mi"
+              #cpu: "500m"
           name: flex-cifs
           securityContext:
               privileged: true

@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heimdall
+spec:
+  selector:
+    matchLabels:
+      app: heimdall
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: heimdall
+      labels:
+        app: heimdall
+    spec:
+      hostname: heimdall
+      containers:
+      - name: heimdall
+        image: angelnu/heimdall:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "155Mi"
+            cpu: "10m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        env:
+        - name: TZ
+          value: Europe/Berlin
+        volumeMounts:
+        - mountPath: /config
+          name: config
+          subPath: heimdall/config
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: nfs-kubernetes
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: heimdall
+  name: heimdall
+spec:
+  clusterIP: None
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  selector:
+    app: heimdall
+---
+
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: heimdall
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
+spec:
+  rules:
+  - host: home.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: heimdall
+          servicePort: http

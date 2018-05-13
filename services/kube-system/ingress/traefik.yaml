@@ -77,8 +77,16 @@ spec:
       terminationGracePeriodSeconds: 60
       hostNetwork: true
       containers:
-      - image: traefik:1.6
+      - image: traefik:latest
+        imagePullPolicy: Always
         name: traefik
+        resources:
+          requests:
+            memory: "30Mi"
+            cpu: "30m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
         ports:
         - name: http
           containerPort: 80
@@ -99,9 +107,15 @@ spec:
         - --etcd.useAPIV3=true
         env:
         - name: DNSMADEEASY_API_KEY
-          value: 8965f05b-63e7-4fd6-81ab-679a323f6f21
+          valueFrom:
+            secretKeyRef:
+              name: dnsmadeeasy
+              key: key
         - name: DNSMADEEASY_API_SECRET
-          value: da133bb2-f5db-4589-9970-16b106f748b5
+          valueFrom:
+            secretKeyRef:
+              name: dnsmadeeasy
+              key: secret
       dnsPolicy: ClusterFirstWithHostNet
       initContainers:
       - image: angelnu/etcd:3.1.12

@@ -18,12 +18,24 @@ spec:
         k8s-app: heapster
     spec:
       serviceAccountName: heapster
-      nodeSelector:
-        beta.kubernetes.io/arch: arm
       containers:
       - name: heapster
-        image: k8s.gcr.io/heapster-arm:v1.4.2
-        imagePullPolicy: IfNotPresent
+        image: angelnu/heapster:v1.4.2
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "50Mi"
+            cpu: "16m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
+        resources:
+          requests:
+            memory: "3Mi"
+            cpu: "1m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
         command:
         - /heapster
         - --source=kubernetes:https://kubernetes.default

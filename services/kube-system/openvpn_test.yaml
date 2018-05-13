@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vpnclient-test
+  labels:
+    app: vpnclient-test
+spec:
+  containers:
+  - name: vpnclient-test
+    image: angelnu/openvpn-helper
+    imagePullPolicy: Always
+    securityContext:
+      capabilities:
+        add:
+          - NET_ADMIN
+    command:
+    - "/bin/sh"
+    - "-ec"
+    - |
+      while [ 1 ]; do sleep 2;done
+    volumeMounts:
+    - name: resolv
+      mountPath: /etc/resolv.conf
+      subPath: resolv.conf
+  initContainers:
+  - name: vxlan
+    #image: armhf/alpine:latest
+    image: angelnu/openvpn-helper
+    imagePullPolicy: Always
+    securityContext:
+      capabilities:
+        add:
+          - NET_ADMIN
+    volumeMounts:
+    - name: resolv
+      mountPath: /etc_shared
+  volumes:
+  - name: openvpn-user
+    configMap:
+      name: openvpn-user
+      defaultMode: 0700
+  - name: resolv
+    emptyDir: {}

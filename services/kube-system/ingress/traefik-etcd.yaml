@@ -58,13 +58,20 @@ spec:
                 values:
                 - etcd
             topologyKey: "kubernetes.io/hostname"
-      terminationGracePeriodSeconds: 2
+      terminationGracePeriodSeconds: 5
       nodeSelector:
         beta.kubernetes.io/arch: arm
       containers:
       - name: "etcd"
-        #image: "quay.io/coreos/etcd:v3.2.3"
-        image: gcr.io/google_containers/etcd-arm:3.1.12
+        image: angelnu/etcd:3.1.12
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "25Mi"
+            cpu: "30m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
         ports:
         - containerPort: 2379
           name: client
