@@ -1,0 +1,18 @@
+- name: Delete old join tokens
+  shell:
+    kubeadm token list|tail -n +2|cut -d' ' -f1|xargs -r kubeadm token delete
+  delegate_to: "{{master}}"
+
+- name: Get join token
+  shell:
+    kubeadm token create
+  delegate_to: "{{master}}"
+  register: token
+
+- name: Join worker
+  shell:
+    kubeadm join
+     --token {{token.stdout}}
+     --node-name={{inventory_hostname}}
+     --discovery-token-unsafe-skip-ca-verification
+     {{master}}:6443

@@ -1,0 +1,18 @@
+- name: Update kube-proxy image to multiarch
+  shell: "kubectl -n kube-system set image daemonset kube-proxy *=angelnu/kube-proxy:v1.10.2"
+  environment: "{{kube_cfg_env}}"
+  delegate_to: "{{master}}"
+  changed_when: '"image updated" in result'
+  register: result
+  changed_when: result.stdout_lines | length
+
+- name: Query nodes in cluster
+  shell: "kubectl get nodes"
+  environment: "{{kube_cfg_env}}"
+  delegate_to: "{{master}}"
+  changed_when: False
+  register: result
+
+- name: "Join cluster"
+  include_tasks: join.yaml
+  when: inventory_hostname not in result
