@@ -1,0 +1,56 @@
+#Install depencies before running this script
+#Expect that user anunez exists
+# - apt-get install openssh-server python vim
+# - ip add add 192.168.2.3
+# - allow ssh as root -> uncomment "PermitRootLogin prohibit-password" in "/etc/ssh/sshd_config"
+# - ssh-copy-id then "cp -a /home/anunez/.ssh /root;chown -R root:root /root/.ssh"
+
+
+- name: Install Intel Server
+  hosts: server.home.angelnu.com
+  become: true
+
+  tasks:
+  - name: Install Packages
+    apt:
+      name: "{{ item }}"
+      force: yes
+      state: present
+    with_items:
+    - ubuntu-desktop
+    - btrfs-progs
+
+  - name: "Create fix network IP"
+    copy:
+      dest: /etc/netplan/fixIP.yaml
+      content: |
+        # This file describes the network interfaces available on your system
+        # For more information, see netplan(5).
+        network:
+          version: 2
+          renderer: networkd
+          ethernets:
+            eno1:
+              match:
+                name: en*
+              dhcp4: yes
+              dhcp6: yes
+              addresses: [192.168.2.3/24]
+              gateway4: 192.168.2.1
+    register: result
+
+  - name: "Generate network setup"
+    shell: netplan apply
+    when: result|changed
+
+  - name: "Add data mount"
+    blockinfile:
+      path: /etc/fstab
+      insertafter: EOF
+      marker: "# {mark} ANSIBLE MANAGED BLOCK - DATA MOUNT"
+      block: UUID=b1fa2c12-bb07-4d3e-a9f2-be84c20040e2 /media/data btrfs relatime,compress=lzo,subvol=@ 0 0
+    register: result
+
+  - name: "Mount /media/data"
+    shell: umount /media/data;mount /media/data
+    when: result|changed
