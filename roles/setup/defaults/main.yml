@@ -11,3 +11,4 @@ PACKAGES:
 PACKAGES2REMOVE:
   - zram-config
   - sendmail-base
+  - libnss-mdns #It uses multicast dns to resol .local -> conflicts with k8s dns names: https://askubuntu.com/questions/81797/nslookup-finds-ip-but-ping-doesnt
