@@ -1,0 +1,15 @@
+- import_role: name=node-settle
+
+- name: Allow work to be dispatched to master
+  shell: "kubectl taint nodes {{inventory_hostname}}  node-role.kubernetes.io/master:NoSchedule-"
+  environment: "{{KUBECTL_ENV}}"
+  register: remove_taint_result
+  failed_when:
+  - "'not found' not in remove_taint_result.stderr"
+  - remove_taint_result.rc != 0
+  vars:
+    queryString: "spec.taints[?key=='node-role.kubernetes.io/master'].effect"
+  when: (last_k8s_node_info|json_query(queryString) == ['NoSchedule'])
+
+- import_role: name=node-settle
+  when: remove_taint_result.changed

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keepalived-secret
+data:
+  #create with echo -n "admin" | base64
+  password: cmVwbGFjZU1l #replaceMe

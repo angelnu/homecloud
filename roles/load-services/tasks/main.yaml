@@ -1,0 +1,9 @@
+- name: Load all services to cluster
+  shell: "kubectl apply -R -f  services"
+  environment: "{{ LOCAL_KUBECTL_ENV }}"
+  register: result
+  vars:
+    queryStr: "status.conditions[?reason=='KubeletReady'].status"
+  changed_when:
+  - not result.stdout|search("unchanged")
+  - not result.stdout|search("configured")

@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plex
+spec:
+  selector:
+    matchLabels:
+      app: plex
+  replicas: 1
+  revisionHistoryLimit: 0
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: plex
+      labels:
+        app: plex
+    spec:
+      hostNetwork: true
+      hostname: plex
+      nodeSelector:
+        beta.kubernetes.io/arch: amd64
+      containers:
+      - name: plex
+        image: plexinc/pms-docker:plexpass
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "500Mi"
+            #cpu: "100m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
+
+        ports:
+        - containerPort: 32400
+        env:
+        - name: TZ
+          value: Europe/Berlin
+        - name: ALLOWED_NETWORKS
+          value: 192.168.1.0/16
+        volumeMounts:
+        - mountPath: /config
+          name: config
+          subPath: plex/config
+        - mountPath: /downloads
+          name: downloads
+        - mountPath: /videos
+          name: videos
+        # - mountPath: /music
+        #   name: music
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: nfs-kubernetes
+      - name: downloads
+        persistentVolumeClaim:
+          claimName: nfs-downloads
+        # flexVolume:
+        #   driver: "angelnu/cifs"
+        #   secretRef:
+        #     name: "cifs-secret"
+        #   options:
+        #     source: "//nas.home.angelnu.com/downloads"
+        #     mountOptions: "dir_mode=0775,file_mode=0664,noperm"
+      - name: videos
+        persistentVolumeClaim:
+          claimName: nfs-video
+        # flexVolume:
+        #   driver: "angelnu/cifs"
+        #   secretRef:
+        #     name: "cifs-secret"
+        #   options:
+        #     source: "//nas.home.angelnu.com/video"
+        #     mountOptions: "dir_mode=0775,file_mode=0664,noperm"
+      # - name: music
+      #   flexVolume:
+      #     driver: "angelnu/cifs"
+      #     secretRef:
+      #       name: "cifs-secret"
+      #     options:
+      #       source: "//nas.home.angelnu.com/music"
+      #       mountOptions: "dir_mode=0775,file_mode=0664,noperm"
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: plex
+  name: plex
+spec:
+  ports:
+  - name: http
+    port: 32400
+    targetPort: 32400
+  selector:
+    app: plex
+---
+
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: plex
+spec:
+  rules:
+  - host: plex.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: plex
+          servicePort: http

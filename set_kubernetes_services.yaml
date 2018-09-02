@@ -1,0 +1,6 @@
+- name: Update all kubernetes services
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: false
+  tasks:
+  - import_role: name=load-services

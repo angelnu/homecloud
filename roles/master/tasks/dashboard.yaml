@@ -1,0 +1,17 @@
+- name: Install Kubernetes Dashboard
+  shell: kubectl apply -f https://github.com/kubernetes/dashboard/blob/master/src/deploy/recommended/kubernetes-dashboard{{ '-arm' if 'arm' in ansible_architecture else '' }}.yaml?raw=true
+  args:
+    warn: false
+  environment: "{{KUBECTL_ENV}}"
+  register: install_network_result
+  failed_when:
+  - "'AlreadyExists' not in install_network_result.stderr"
+  - install_network_result.rc != 0
+  changed_when: "'AlreadyExists' not in install_network_result.stderr"
+
+- name: Update dashboard image to multiarch
+  shell: "kubectl -n kube-system set image deployment kubernetes-dashboard *={{ K8S_DASHBOARD_IMAGE }}"
+  environment: "{{KUBECTL_ENV}}"
+  delegate_to: "{{ KUBELET_PRIMARY_MASTER_HOSTNAME }}"
+  register: result
+  changed_when: result.stdout_lines | length

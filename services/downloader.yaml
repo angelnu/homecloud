@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpn-downloader
+spec:
+  selector:
+    matchLabels:
+      app: vpn-downloader
+  replicas: 1
+  revisionHistoryLimit: 0
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: vpn-downloader
+      labels:
+        app: vpn-downloader
+    spec:
+      hostname: vpn-downloader
+      nodeSelector: #Only schedule in the big server
+        kubernetes.io/hostname: server.home.angelnu.com
+      containers:
+      - name: vpn-downloader
+        image: ubuntu:latest
+        imagePullPolicy: Always
+        command:
+        - "/bin/sh"
+        - "-ec"
+        - |
+          while [ 1 ]; do sleep 2;done
+        env:
+        - name: TZ
+          value: Europe/Berlin
+        volumeMounts:
+        - mountPath: /downloads
+          name: data
+        - name: resolv #VPN
+          mountPath: /etc/resolv.conf
+          subPath: resolv.conf
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: nfs-kubernetes
+      - name: data
+        flexVolume:
+          driver: "angelnu/cifs"
+          secretRef:
+            name: "cifs-secret"
+          options:
+            source: "//nas.home.angelnu.com/downloads"
+            mountOptions: "dir_mode=0775,file_mode=0664,noperm"
+
+# VPN boiler-plate
+      - name: resolv
+        emptyDir: {}
+      initContainers:
+      - name: vxlan
+        #image: armhf/alpine:latest
+        image: angelnu/openvpn-helper
+        imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        volumeMounts:
+        - name: resolv
+          mountPath: /etc_shared
