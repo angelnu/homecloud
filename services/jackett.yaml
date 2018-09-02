@@ -7,6 +7,7 @@ spec:
     matchLabels:
       app: jackett
   replicas: 1
+  revisionHistoryLimit: 0
   strategy:
     type: Recreate
   template:
@@ -16,6 +17,8 @@ spec:
         app: jackett
     spec:
       hostname: jackett
+      nodeSelector: #Only schedule in the big server
+        kubernetes.io/hostname: server.home.angelnu.com
       containers:
       - name: jackett
         image: angelnu/jackett
@@ -27,6 +30,14 @@ spec:
           limits:
             #memory: "128Mi"
             #cpu: "500m"
+        livenessProbe:
+          exec:
+            command:
+            - wget #no ping in this container
+            - rss.angelnu.com
+          initialDelaySeconds: 60
+          periodSeconds: 300
+          failureThreshold: 2
         ports:
         - containerPort: 9117
         env:
@@ -38,6 +49,7 @@ spec:
           subPath: jackett/config
         - mountPath: /downloads
           name: data
+          subPath: downloaders/transmission
         - name: resolv #VPN
           mountPath: /etc/resolv.conf
           subPath: resolv.conf
@@ -51,7 +63,7 @@ spec:
           secretRef:
             name: "cifs-secret"
           options:
-            source: "//nas.home.angelnu.com/downloads/downloaders/transmission/watch"
+            source: "//nas.home.angelnu.com/downloads"
             mountOptions: "dir_mode=0775,file_mode=0664,noperm"
 
 # VPN boiler-plate

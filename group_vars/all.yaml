@@ -3,42 +3,40 @@
 #
 ---
 
-# Base settings
-MASTER_VIP: 192.168.2.220
-
 #If set to true it will reset the K8S cluster
 K8S_RESET: false
 
-#Secret token for the cluster - TBD generate
-#NOTE: also using for etcd
-#token: 506f42.4251ab3d42ed9d10
-master: "{{ groups['masters'][0] }}"
+KUBELET_PRIMARY_MASTER_HOSTNAME: "{{ groups['masters'][0] }}"
 KUBELET_SELFHOST: false
 KUBELET_DYN_CONFIG_PATH: /var/lib/kubelet/config/dynamic
 KUBELET_CHECKPOINT_PATH: /etc/kubernetes/checkpoint
 KUBELET_OPTS:
-  "--bootstrap-checkpoint-path={{KUBELET_CHECKPOINT_PATH}}"
+  "--bootstrap-checkpoint-path={{KUBELET_CHECKPOINT_PATH}} --allow-privileged=true"
 KUBEADM_OPTS_INIT:
-  "--ignore-preflight-errors=SystemVerification" #Ignore btrfs
-#KUBEADM_APISERVER_EXTRAHOSTS: "'*.angelnu.com',"
+#  "--ignore-preflight-errors=SystemVerification" #Ignore btrfs
+KUBEADM_APISERVER_EXTRAHOSTS: k8s.angelnu.com
+KUBEADM_CFG: /etc/kubernetes/kubeadmcfg.yaml
 #KUBEADM_OPTS:
 # "--feature-gates=HighAvailability=true\
 #  {{ ',SelfHosting=true,StoreCertsInSecrets=true' if KUBELET_SELFHOST else '' }}"
 #cidr: 10.244.0.0/16
 
+#Image to use for the proxy - needed to be multi-arch since proxy runs on all nodes
+K8S_PROXY_IMAGE: angelnu/kube-proxy:v1.11.1
+K8S_DASHBOARD_IMAGE: angelnu/kubernetes-dashboard:v1.8.3
+
 #Peer ID of the first etcd Peer
-ETCD_FIRST_PEER: 8e9e05c52164694d
-ETCD_IMAGE: "gcr.io/google_containers/etcd{{ '-arm' if 'arm' in ansible_architecture else '' }}:3.1.10"
+ETCD_FIRST_PEER: a874c87fd42044f
 
 #K8S files in the server
 K8S_ETC_PATH: /etc/kubernetes
-etcd_cfg_path: "/etc/kubernetes/manifests/etcd.yaml"
-kubelet_cfg_path: "/etc/kubernetes/kubelet.conf"
-kube_cfg_path: "/etc/kubernetes/admin.conf"
+K8S_ETCD_CFG_PATH: /etc/kubernetes/manifests/etcd.yaml
+K8S_KUBELET_CFG_PATH: /etc/kubernetes/kubelet.conf
+K8S_ADMIN_CFG_PATH: /etc/kubernetes/admin.conf
 
 #Environment varibles for kubectl
-kube_cfg_env:
-  KUBECONFIG: "{{kube_cfg_path}}"
+KUBECTL_ENV:
+  KUBECONFIG: "{{K8S_ADMIN_CFG_PATH}}"
 
 #Environment varibles for kubectl
 LOCAL_KUBECTL_ENV:

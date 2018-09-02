@@ -5,38 +5,38 @@
     insertafter: "^{"
     line: '	"experimental": "enabled",'
 
-# Add Kubernetes internal DNS server to host -> needed for glusterfs client to resolve nodes
-- name: Check if old resolv.conf is being used - {{kubelet_cfg_path}}
-  stat:
-    path: "/etc/resolvconf/resolv.conf.d/tail"
-  register: isOldResolv
-#Handle legacy resolv.conf
-- name: "Add Kubernetes internal DNS to host resolv"
-  blockinfile:
-    path: /etc/resolvconf/resolv.conf.d/tail
-    block: |
-      options rotate
-      options timeout:1
-      nameserver 10.96.0.10
-  register: result
-  when: isOldResolv.stat.exists
-- name: Restart resolvconf service
-  systemd:
-    name: resolvconf
-    state: restarted
-    enabled: yes
-    daemon_reload: yes
-  when: "isOldResolv.stat.exists and result | changed"
-#Handle systemd handling DNS
-- name: "Create fix resolv.conf"
-  copy:
-    dest: /etc/resolv.conf
-    content: |
-      # This file was created by ansible
-      nameserver 10.96.0.10
-      nameserver 127.0.0.53
-      search fritz.box
-  when: "isOldResolv.stat.exists == False"
+# # Add Kubernetes internal DNS server to host -> needed for glusterfs client to resolve nodes
+# - name: Check if old resolv.conf is being used - /etc/resolvconf/resolv.conf.d/tail
+#   stat:
+#     path: "/etc/resolvconf/resolv.conf.d/tail"
+#   register: isOldResolv
+# #Handle legacy resolv.conf
+# - name: "Add Kubernetes internal DNS to host resolv"
+#   blockinfile:
+#     path: /etc/resolvconf/resolv.conf.d/head
+#     block: |
+#       options rotate
+#       options timeout:1
+#       nameserver 10.96.0.10
+#   register: result
+#   when: isOldResolv.stat.exists
+# - name: Restart resolvconf service
+#   systemd:
+#     name: resolvconf
+#     state: restarted
+#     enabled: yes
+#     daemon_reload: yes
+#   when: "isOldResolv.stat.exists and result | changed"
+# #Handle systemd handling DNS
+# - name: "Create fix resolv.conf"
+#   copy:
+#     dest: /etc/resolv.conf
+#     content: |
+#       # This file was created by ansible
+#       nameserver 10.96.0.10
+#       nameserver 127.0.0.53
+#       search fritz.box
+#   when: "isOldResolv.stat.exists == False"
 
 
 # Logrotate

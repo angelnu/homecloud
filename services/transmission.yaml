@@ -7,6 +7,7 @@ spec:
     matchLabels:
       app: transmission
   replicas: 1
+  revisionHistoryLimit: 0
   strategy:
     type: Recreate
   template:
@@ -16,6 +17,8 @@ spec:
         app: transmission
     spec:
       hostname: transmission
+      nodeSelector: #Only schedule in the big server
+        kubernetes.io/hostname: server.home.angelnu.com
       containers:
       - name: transmission
         image: angelnu/transmission:latest
@@ -29,6 +32,16 @@ spec:
             #cpu: "500m"
         ports:
         - containerPort: 9091
+        livenessProbe:
+          exec:
+            command:
+            - ping
+            - -c3
+            - -w15
+            - server.angelnu.com
+          initialDelaySeconds: 60
+          periodSeconds: 300
+          failureThreshold: 2
         env:
         - name: TZ
           value: Europe/Berlin

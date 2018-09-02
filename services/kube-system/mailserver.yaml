@@ -24,15 +24,25 @@ spec:
       - name: mailserver
         image: angelnu/exim:latest
         imagePullPolicy: Always
-        command:
-        - "/bin/sh"
-        - "-ec"
-        - |
-          while [ 1 ]; do sleep 2;done
+        # command:
+        # - "/bin/sh"
+        # - "-ec"
+        # - |
+        #   while [ 1 ]; do sleep 2;done
         imagePullPolicy: Always
         ports:
         - containerPort: 25
         env:
+        - name: GMAIL_USER
+          valueFrom:
+            secretKeyRef:
+              name: gmail-secret
+              key: username
+        - name: GMAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: gmail-secret
+              key: password
         - name: RELAY_NETWORKS
           value: ":192.168.0.0/16:10.0.0.0/8"
         - name: MAILNAME

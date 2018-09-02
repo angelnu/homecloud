@@ -71,7 +71,6 @@ spec:
       containers:
       - name: traefik-ingress-lb
         #image: traefik:latest
-        imagePullPolicy: Always
         image: alpine
         imagePullPolicy: Always
         volumeMounts:
@@ -81,6 +80,7 @@ spec:
           - containerPort: 80
           - containerPort: 443
           - containerPort: 8080
+        imagePullPolicy: Always
         args:
           - ls
           #- storeconfig

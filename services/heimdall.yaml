@@ -7,6 +7,7 @@ spec:
     matchLabels:
       app: heimdall
   replicas: 1
+  revisionHistoryLimit: 0
   strategy:
     type: Recreate
   template:
@@ -67,6 +68,7 @@ kind: Ingress
 metadata:
   name: heimdall
   annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
     ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
 spec:
   rules:

@@ -3,11 +3,14 @@ ssh:
   pub_key_path: "~/.ssh/id_rsa.pub"
 PACKAGES:
   - docker-ce=18.03.*
-  - kubeadm=1.10*
+  - kubeadm=1.11*
+  - kubelet=1.11*
+  - kubectl=1.11*
   - rsync
   - glusterfs-client
   - nfs-common
   - attr
+  - conntrack
 PACKAGES2REMOVE:
   - zram-config
   - sendmail-base

@@ -2,9 +2,19 @@
 
 Creates/Updates my private cloud based on Kubernetes and deploy my services on it.
 
-* Support HA Kubernetes cluster on ARM (Hybrid with Intel will be added)
-* Use Glusterfs for persistent volumes (see gluster service)
-* Deploy [Iobroker](https://github.com/ioBroker/ioBroker) for home automation
+- Support HA Kubernetes cluster on hybrid architectures (I run masters on K8S and a big worker on Intel)
+- Many services: see the [services](services) folder
+  - [Iobroker](https://github.com/ioBroker/ioBroker) for home automation
+  - Ingress based on [Traefik](https://traefik.io/)
+  - K8S monitoring with Grafana
+  - cifs (samba) mounts
+  - rebalancing of nodes based on [Kubernetes descheduler](https://github.com/kubernetes-incubator/descheduler)
+  - Use Glusterfs for persistent volumes (see gluster service)
+  - keepalived for load balancing between the Kubernetes nodes
+  - mail server based on exim4
+  - openvpn client for multiple pods to share the same vpn Server
+  - [Nextcloud](https://nextcloud.com/)
+  - [Tiny Tiny RSS](https://tt-rss.org/)
 
 ## HW List
 
@@ -20,39 +30,7 @@ Here is the hardware you will need to complete the project:
 
 ## Setup
 
-### Dependencies
-* [Ansible](https://www.ansible.com/)
-* `git checkout --recursive git@github.com:angelnu/homecloud.git`
-
-### Base HW + OS
-1. Install any Debian/Ubuntu based OS. I use:
-   - [Odroid /Orange PI] (https://www.armbian.com/download/)
-   - [Raspberry](https://github.com/hypriot/image-builder-rpi/releases/)
-2. Setup ssh access to root using an ssh key
-3. (optional) Mount /media/data to a large enough folder. Most of the data will go here, including the glusterfs bricks
-4. edit hosts
-5. (optional) edit group_vars
-6. `ansible-playbook -i hosts setup.yml`
-7. Ensure that /etc/machine-id is unique in all nodes or run (see https://groups.google.com/forum/#!topic/beagleboard/aJLOyi_Pzz8):
-   `ansible-playbook -i hosts-production reset_machine_id.yaml`
-   If you do not make that the sympthom will be that kube node UUID ('kubectl get nodes') will be the same. This results in problems with Weave.
-
-
-### Setup Kubernetes
-1. `ansible-playbook -i hosts master.yml`
-   - Use `ansible-playbook -i hosts reset.yml` if there is an old installation to reset
-
-### (Optional) Build docker images
-1. `export KUBECONFIG=kubeconfig/admin.conf`
-2.  `ansible-playbook -i hosts images.yml`
-
-### Deploy services
-1. `export KUBECONFIG=kubeconfig/admin.conf`
-2. `kubectl update -f services`
-
-## ToDos
-* Add multi-arch support
-* Ingress port
+See [setup.md](setup.md)
 
 
 ## References

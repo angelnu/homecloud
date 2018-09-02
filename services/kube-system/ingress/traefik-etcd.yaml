@@ -63,7 +63,7 @@ spec:
         beta.kubernetes.io/arch: arm
       containers:
       - name: "etcd"
-        image: angelnu/etcd:3.1.12
+        image: angelnu/etcd:3.1.17
         imagePullPolicy: Always
         resources:
           requests:
@@ -88,8 +88,8 @@ spec:
           #After the first initialisation the STATE should be changes to existing
           #This is needed in case a node has to be removed and readded again
           #To clean up then go in a working node and do etcdctl member remove and then add
-          value: "existing"
-          #value: "new"
+          #value: "existing"
+          value: "new"
         volumeMounts:
         - name: data
           mountPath: /var/run/etcd

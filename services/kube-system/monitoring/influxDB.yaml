@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: influxdb
-        image: angelnu/heapster-influxdb:v1.3.3
+        image: influxdb
         imagePullPolicy: Always
         resources:
           requests:
@@ -23,13 +23,13 @@ spec:
             #memory: "128Mi"
             #cpu: "500m"
         volumeMounts:
-        - mountPath: /data
+        - mountPath: /var/lib/influxdb
           name: influxdb-storage
+          subPath: influxdb
       volumes:
       - name: influxdb-storage
-        glusterfs:
-          endpoints: glusterfs-storage
-          path: influxdb
+        persistentVolumeClaim:
+          claimName: nfs-kubernetes
 ---
 apiVersion: v1
 kind: Service

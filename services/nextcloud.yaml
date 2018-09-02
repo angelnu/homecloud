@@ -7,6 +7,7 @@ spec:
     matchLabels:
       app: nextcloud
   replicas: 1
+  revisionHistoryLimit: 0
   strategy:
     type: Recreate
   template:
@@ -16,6 +17,8 @@ spec:
         app: nextcloud
     spec:
       hostname: nextcloud
+      nodeSelector: #Only schedule in the big server
+        kubernetes.io/hostname: server.home.angelnu.com
       containers:
       - name: nextcloud
         image: angelnu/nextcloudplus:latest
@@ -78,7 +81,8 @@ spec:
   - name: admin
     port: 4443
     targetPort: 4443
-  type: NodePort
+  type: LoadBalancer
+  loadBalancerIP: 192.168.2.202
   selector:
     app: nextcloud
 
@@ -90,6 +94,8 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: nextcloud
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
   - host: nextcloud.angelnu.com

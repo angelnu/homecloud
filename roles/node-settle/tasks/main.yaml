@@ -1,6 +1,7 @@
 - name: Wait for node to be ready
   shell: "kubectl get nodes -o json {{inventory_hostname}}"
-  environment: "{{kube_cfg_env}}"
+  environment: "{{KUBECTL_ENV}}"
+  delegate_to: "{{KUBELET_PRIMARY_MASTER_HOSTNAME}}"
   register: result
   vars:
     queryStr: "status.conditions[?reason=='KubeletReady'].status"

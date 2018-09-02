@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: webdav
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
   template:
@@ -16,10 +16,10 @@ spec:
         app: webdav
     spec:
       hostname: webdav
-      nodeSelector: #TBD: use server name, not arch
-        beta.kubernetes.io/arch: amd64
+      nodeSelector: #Only schedule in the big server
+        kubernetes.io/hostname: server.home.angelnu.com
       containers:
-      - name: heimdall
+      - name: webdav
         image: angelnu/apache-webdav:latest
         imagePullPolicy: Always
         resources:
@@ -81,7 +81,7 @@ metadata:
     ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
 spec:
   rules:
-  - host: webdav.home.angelnu.com
+  - host: webdav.angelnu.com
     http:
       paths:
       - path: /

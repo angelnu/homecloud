@@ -1,6 +1,5 @@
 [masters]
-#home.angelnu.com name=home.angelnu.com
-#pi1.angelnu.com  name=pi1.angelnu.com
+pi1.angelnu.com  name=pi1.angelnu.com
 pi2.angelnu.com  name=pi2.angelnu.com
 pi3.angelnu.com name=pi3.angelnu.com
 
@@ -11,7 +10,6 @@ masters
 workers
 
 [build]
-#home.angelnu.com  name=home.angelnu.com
 pi1.angelnu.com name=pi1.angelnu.com
 
 [all:vars]

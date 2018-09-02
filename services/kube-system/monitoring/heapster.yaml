@@ -20,7 +20,7 @@ spec:
       serviceAccountName: heapster
       containers:
       - name: heapster
-        image: angelnu/heapster:v1.4.2
+        image: angelnu/heapster:v1.5.4
         imagePullPolicy: Always
         resources:
           requests:
