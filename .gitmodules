@@ -34,9 +34,6 @@
 [submodule "images/openvpn-helper"]
 	path = images/openvpn-helper
 	url = git@github.com:angelnu/docker-openvpn-helper.git
-[submodule "images/oxia-baseimage"]
-	path = images/oxia-baseimage
-	url = git@github.com:angelnu/docker-light-baseimage.git
 [submodule "images/osixia-openldap"]
 	path = images/osixia-openldap
 	url = git@github.com:angelnu/docker-openldap.git
