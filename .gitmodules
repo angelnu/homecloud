@@ -37,3 +37,6 @@
 [submodule "images/osixia-openldap"]
 	path = images/osixia-openldap
 	url = git@github.com:angelnu/docker-openldap.git
+[submodule "images/osixia-baseimage"]
+	path = images/osixia-baseimage
+	url = git@github.com:angelnu/docker-light-baseimage.git
