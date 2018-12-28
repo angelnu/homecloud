@@ -1,0 +1,20 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: traefik-etcd-viewer
+  namespace: kube-system
+data:
+  config.default.ini: |
+    [app]
+    port=8080
+    auth=false
+
+    [etcd]
+    root_key=e3w_test
+    dir_value=
+    addr=etcd:2379,etcd:22379,etcd:32379
+    username=
+    password=
+    cert_file=
+    key_file=
+    ca_file=

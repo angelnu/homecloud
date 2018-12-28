@@ -42,9 +42,11 @@ data:
       [[acme.domains]]
         main = "*.angelnu.com"
       [[acme.domains]]
+        main = "*.auto.angelnu.com"
+      [[acme.domains]]
         main = "*.home.angelnu.com"
       [[acme.domains]]
-        main = "*.auto.angelnu.com"
+        main = "*.k8s.angelnu.com"
       [[acme.domains]]
         main = "*.nunez-gregoire.eu"
     [etcd]
@@ -70,8 +72,8 @@ spec:
     spec:
       containers:
       - name: traefik-ingress-lb
-        #image: traefik:latest
-        image: alpine
+        image: traefik:latest
+        #image: alpine
         imagePullPolicy: Always
         volumeMounts:
           - mountPath: "/config"
@@ -82,10 +84,10 @@ spec:
           - containerPort: 8080
         imagePullPolicy: Always
         args:
-          - ls
-          #- storeconfig
-          #- --configfile=/config/traefik.toml
-          #- --etcd.useAPIV3=true
+          #- ls
+          - storeconfig
+          - --configfile=/config/traefik.toml
+          - --etcd.useAPIV3=true
       volumes:
       - name: config
         configMap:
