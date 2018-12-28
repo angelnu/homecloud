@@ -104,7 +104,7 @@ spec:
     spec:
       containers:
       - name: comics-nginx
-        image: nginx:alpine
+        image: nginx
         imagePullPolicy: Always
         resources:
           requests:
