@@ -19,7 +19,7 @@ spec:
       hostname: heimdall
       containers:
       - name: heimdall
-        image: angelnu/heimdall:latest
+        image: linuxserver/heimdall
         imagePullPolicy: Always
         resources:
           requests:
@@ -55,8 +55,8 @@ spec:
   clusterIP: None
   ports:
   - name: http
-    port: 80
-    targetPort: 80
+    port: 443
+    targetPort: 443
   selector:
     app: heimdall
 ---
@@ -68,7 +68,7 @@ kind: Ingress
 metadata:
   name: heimdall
   annotations:
-    ingress.kubernetes.io/ssl-redirect: "true"
+    #ingress.kubernetes.io/ssl-redirect: "true"
     ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
 spec:
   rules:
@@ -78,4 +78,4 @@ spec:
       - path: /
         backend:
           serviceName: heimdall
-          servicePort: http
+          servicePort: 443
