@@ -35,9 +35,9 @@ spec:
             - ping
             - -c3
             - -w15
-            - server.angelnu.com
-          initialDelaySeconds: 60
-          periodSeconds: 300
+            - casa96.angelnu.com
+          periodSeconds: 60
+          failureThreshold: 15
         ports:
         - containerPort: 53
         securityContext:
