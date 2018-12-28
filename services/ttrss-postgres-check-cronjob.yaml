@@ -1,0 +1,51 @@
+# ------------------- CronJob ------------------- #
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: ttrss-postgres
+spec:
+  schedule: "0 10 * * *"
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: ttrss-postgres
+        spec:
+          containers:
+            - name: ttrss-postgres
+              image: postgres
+              imagePullPolicy: Always
+              command:
+              - /bin/sh
+              - -c
+              - pg_dumpall > /backup/new && mv /backup/new /backup/backup
+              resources:
+                requests:
+                  memory: "10Mi"
+                  cpu: "5m"
+                limits:
+                  #memory: "128Mi"
+                  #cpu: "500m"
+              env:
+              - name: PGHOST
+                value: ttrss-postgres
+              - name: PGUSER
+                valueFrom:
+                  secretKeyRef:
+                    name: ttrss-postgres-secret
+                    key: username
+              - name: PGPASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: ttrss-postgres-secret
+                    key: password
+              volumeMounts:
+              - mountPath: /backup
+                name: nfs-kubernetes
+                subPath: ttrss/postgres-backup
+          restartPolicy: OnFailure
+          volumes:
+            - name: nfs-kubernetes
+              persistentVolumeClaim:
+                claimName: nfs-kubernetes

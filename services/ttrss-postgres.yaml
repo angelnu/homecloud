@@ -19,10 +19,10 @@ spec:
       hostname: ttrss-postgres
       #NOTE: it is not possible to open an 32 bit created DB into a 64 bit OS.
       nodeSelector:
-        beta.kubernetes.io/arch: arm
+        beta.kubernetes.io/arch: amd64
       containers:
       - name: ttrss-postgres
-        image: postgres:alpine
+        image: postgres
         imagePullPolicy: Always
         resources:
           requests:
@@ -56,6 +56,10 @@ spec:
         - mountPath: /var/lib/postgresql/data
           name: nfs-kubernetes
           subPath: ttrss/postgres
+        - mountPath: /backup
+          name: nfs-kubernetes
+          subPath: ttrss/postgres-backup
+          readOnly: true
       volumes:
         - name: nfs-kubernetes
           persistentVolumeClaim:
