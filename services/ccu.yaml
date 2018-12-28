@@ -1,28 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ccu2
+  name: ccu
 spec:
   selector:
     matchLabels:
-      app: ccu2
+      app: ccu
   replicas: 1
   revisionHistoryLimit: 0
   strategy:
     type: Recreate
   template:
     metadata:
-      name: ccu2
+      name: ccu
       labels:
-        app: ccu2
+        app: ccu
     spec:
-      hostname: ccu2
+      hostname: ccu
       nodeSelector:
         beta.kubernetes.io/arch: arm
+        hmip: "true"
       containers:
-      - name: ccu2
-        image: angelnu/ccu2:latest
+      - name: ccu
+        image: angelnu/ccu:3
         imagePullPolicy: Always
+        securityContext:
+          privileged: true
         resources:
           requests:
             memory: "130Mi"
@@ -36,8 +39,20 @@ spec:
           - name: CHECK_PERSISTENT_DIR
             value: "y"
         ports:
+        ##ssh
+        - containerPort: 22
+        # web-ui
         - containerPort: 80
+        # web-ui (HTTPS)
+        - containerPort: 443
+        # wired Homematic
+        - containerPort: 2000
+        # wireless Homematic (rfd)
         - containerPort: 2001
+        # Homematic IP
+        - containerPort: 2010
+        # Rega
+        - containerPort: 8081
         # livenessProbe:
         #   tcpSocket:
         #     port: 2001
@@ -45,21 +60,21 @@ spec:
         #   timeoutSeconds: 10
         volumeMounts:
         - mountPath: /mnt
-          name: ccu2-volume
-        - mountPath: /dev_org
-          name: dev-org-volume
-        - mountPath: /sys_org
-          name: sys-org-volume
+          name: ccu-volume
+        - mountPath: /dev
+          name: dev-volume
+        - mountPath: /sys
+          name: sys-volume
       volumes:
-        - name: ccu2-volume
+        - name: ccu-volume
           glusterfs:
             endpoints: glusterfs-storage
             path: ccu2
-        - name: dev-org-volume
+        - name: dev-volume
           hostPath:
             path: /dev
             type: Directory
-        - name: sys-org-volume
+        - name: sys-volume
           hostPath:
             path: /sys
             type: Directory
@@ -71,23 +86,31 @@ kind: Service
 apiVersion: v1
 metadata:
   labels:
-    app: ccu2
-  name: ccu2
+    app: ccu
+  name: ccu
 spec:
   ports:
   - name: http
     port: 80
     targetPort: 80
-    nodePort: 30080
+  - name: https
+    port: 443
+    targetPort: 443
   - name: rega
     port: 8181
     targetPort: 8181
+  - name: hs485
+    port: 2000
+    targetPort: 2000
   - name: rfd
     port: 2001
     targetPort: 2001
+  - name: hmip
+    port: 2010
+    targetPort: 2010
   type: NodePort
   selector:
-    app: ccu2
+    app: ccu
 
 
 ---
@@ -96,7 +119,7 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: ccu2
+  name: ccu
   annotations:
     ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
 spec:
@@ -106,5 +129,5 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: ccu2
+          serviceName: ccu
           servicePort: http
