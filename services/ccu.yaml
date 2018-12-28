@@ -53,6 +53,8 @@ spec:
         - containerPort: 2010
         # Rega
         - containerPort: 8081
+        # Virtual Devices
+        - containerPort: 9292
         # livenessProbe:
         #   tcpSocket:
         #     port: 2001
@@ -90,15 +92,15 @@ metadata:
   name: ccu
 spec:
   ports:
+  - name: ssh
+    port: 22
+    targetPort: 22
   - name: http
     port: 80
     targetPort: 80
   - name: https
     port: 443
     targetPort: 443
-  - name: rega
-    port: 8181
-    targetPort: 8181
   - name: hs485
     port: 2000
     targetPort: 2000
@@ -108,6 +110,12 @@ spec:
   - name: hmip
     port: 2010
     targetPort: 2010
+  - name: rega
+    port: 8181
+    targetPort: 8181
+  - name: vdev
+    port: 9292
+    targetPort: 9292
   type: NodePort
   selector:
     app: ccu
