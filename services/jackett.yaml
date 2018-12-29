@@ -50,9 +50,21 @@ spec:
         - mountPath: /downloads
           name: data
           subPath: downloaders/transmission
-        - name: resolv #VPN
+# VPN boiler-plate 1 (insert at the end of volumeMounts)
+        - name: resolv
           mountPath: /etc/resolv.conf
           subPath: resolv.conf
+      - name: vxlan
+        image: angelnu/openvpn-helper
+        imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        volumeMounts:
+        - name: resolv
+          mountPath: /etc_shared
+# end of VPN boiler-plate 1
       volumes:
       - name: config
         persistentVolumeClaim:
@@ -66,12 +78,11 @@ spec:
             source: "//nas.home.angelnu.com/downloads"
             mountOptions: "dir_mode=0775,file_mode=0664,noperm"
 
-# VPN boiler-plate
+# VPN boiler-plate 2 (append at the end of the volumes section)
       - name: resolv
         emptyDir: {}
       initContainers:
-      - name: vxlan
-        #image: armhf/alpine:latest
+      - name: init-vxlan
         image: angelnu/openvpn-helper
         imagePullPolicy: Always
         securityContext:
@@ -81,6 +92,7 @@ spec:
         volumeMounts:
         - name: resolv
           mountPath: /etc_shared
+# end of VPN boiler-plate 2
 
 ---
 # -------------------- Service ------------------- #

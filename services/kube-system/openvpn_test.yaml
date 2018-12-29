@@ -35,16 +35,15 @@ spec:
             - ping
             - -c3
             - -w15
-            - server.angelnu.com
+            - casa96.angelnu.com
           initialDelaySeconds: 60
           periodSeconds: 300
         volumeMounts:
+# VPN boiler-plate 1 (insert at the end of volumeMounts)
         - name: resolv
           mountPath: /etc/resolv.conf
           subPath: resolv.conf
-      initContainers:
       - name: vxlan
-        #image: armhf/alpine:latest
         image: angelnu/openvpn-helper
         imagePullPolicy: Always
         securityContext:
@@ -54,6 +53,20 @@ spec:
         volumeMounts:
         - name: resolv
           mountPath: /etc_shared
+# end of VPN boiler-plate 1
       volumes:
+# VPN boiler-plate 2 (append at the end of the volumes section)
       - name: resolv
         emptyDir: {}
+      initContainers:
+      - name: init-vxlan
+        image: angelnu/openvpn-helper
+        imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        volumeMounts:
+        - name: resolv
+          mountPath: /etc_shared
+# end of VPN boiler-plate 2
