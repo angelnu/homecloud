@@ -1,0 +1,195 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitea-config
+data:
+  app.ini: |
+    APP_NAME = Gitea
+    RUN_USER = git
+    RUN_MODE = prod
+
+    [repository]
+    FORCE_PRIVATE = false
+    DISABLE_HTTP_GIT = false
+
+    [repository.upload]
+    ENABLED = true
+    ALLOWED_TYPES =
+    FILE_MAX_SIZE = 3
+    MAX_FILES = 5
+
+    [server]
+    PROTOCOL = https
+    HTTP_PORT = 443
+    DOMAIN = gitea.local
+    ROOT_URL = https://gitea.angelnu.com/
+    LANDING_PAGE = home
+    SSH_PORT = 22222
+    REDIRECT_OTHER_PORT = true
+    PORT_TO_REDIRECT = 80
+
+    [service]
+    ENABLE_CAPTCHA = true
+    ACTIVE_CODE_LIVE_MINUTES = 180
+    RESET_PASSWD_CODE_LIVE_MINUTES = 180
+    REGISTER_EMAIL_CONFIRM = false
+    DISABLE_REGISTRATION = false
+    REQUIRE_SIGNIN_VIEW = false
+    ENABLE_NOTIFY_MAIL = false
+    ENABLE_REVERSE_PROXY_AUTHENTICATION = false
+    ENABLE_REVERSE_PROXY_AUTO_REGISTRATION = false
+
+    [database]
+    DB_TYPE = postgres
+    HOST = postgres.local
+    NAME = gitea
+    USER = gitea
+    PASSWD = giteapassword
+    SSL_MODE = false
+
+    [admin]
+    DISABLE_REGULAR_ORG_CREATION = false
+
+    [security]
+    INSTALL_LOCK = true
+    SECRET_KEY = "Z2l0ZWE="
+
+    [ui]
+    EXPLORE_PAGING_NUM = 20
+    ISSUE_PAGING_NUM = 10
+    FEED_MAX_COMMIT_NUM = 5
+
+    [cache]
+    ADAPTER = memory
+    INTERVAL = 60
+    HOST =
+
+    [webhook]
+    QUEUE_LENGTH = 1000
+    DELIVER_TIMEOUT = 5
+    SKIP_TLS_VERIFY = true
+    PAGING_NUM = 10
+
+    [log]
+    MODE = console
+    LEVEL = Trace
+
+    [other]
+    SHOW_FOOTER_BRANDING = false
+    SHOW_FOOTER_VERSION = true
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: gitea
+  labels:
+    name: gitea
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: gitea
+    spec:
+      nodeSelector:
+        beta.kubernetes.io/arch: amd64
+      # Initial rights settings when creating disk can be incorrect for the git user in the gitea container: Use init container to set the rights
+      initContainers:
+      - name: init-disk
+        image: busybox:latest
+        command:
+        - /bin/chown
+        - 1000:1000
+        - /data
+        volumeMounts:
+        - name: gitea
+          mountPath: "/data"
+      containers:
+      - name: gitea
+        image: "gitea/gitea:1"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        - containerPort: 22
+        env:
+        - name: TZ
+          value: Europe/Berlin
+        volumeMounts:
+        - name: gitea
+          mountPath: "/data"
+          subPath: gitea/data
+        #- name: gitea-config
+        #  mountPath: /data/gitea/conf
+        resources:
+          requests:
+            cpu: 10m
+            memory: 50Mi
+          limits:
+            cpu: 1
+            memory: 200Mi
+      volumes:
+      - name: gitea
+        persistentVolumeClaim:
+          claimName: nfs-kubernetes
+      - name: gitea-config
+        configMap:
+          name: gitea-config
+
+---
+# -------------------- Service ------------------- #
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitea-web
+  labels:
+    name: gitea-web
+spec:
+  ports:
+    - name: gitea-web
+      port: 80
+      targetPort: 3000
+  selector:
+    name: gitea
+  sessionAffinity: ClientIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitea-ssh
+  labels:
+    name: gitea-ssh
+spec:
+  ports:
+    - name: gitea-ssh
+      port: 2222
+      targetPort: 22
+  selector:
+    name: gitea
+  type: LoadBalancer
+  loadBalancerIP: 192.168.2.230
+  sessionAffinity: ClientIP
+---
+
+# ------------------- Ingress ------------------- #
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gitea
+  annotations:
+spec:
+  rules:
+  - host: git.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: gitea-web
+          servicePort: 80
+      - backend:
+          serviceName: gitea-ssh
+          servicePort: 22

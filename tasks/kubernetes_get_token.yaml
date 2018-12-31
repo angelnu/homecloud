@@ -1,0 +1,19 @@
+- name: Delete old join tokens
+  shell:
+    kubeadm token list|tail -n +2|cut -d' ' -f1|xargs -r kubeadm token delete
+  delegate_to: "{{ KUBELET_PRIMARY_MASTER_HOSTNAME }}"
+  run_once: true
+
+- name: Get join token
+  shell:
+    kubeadm token create
+  delegate_to: "{{ KUBELET_PRIMARY_MASTER_HOSTNAME }}"
+  register: kubernetes_token
+  run_once: true
+
+- name: Get ca cert token
+  shell:
+    openssl x509 -in /etc/kubernetes/pki/ca.crt -noout -pubkey | openssl rsa -pubin -outform DER 2>/dev/null | sha256sum | cut -d' ' -f1
+  delegate_to: "{{ KUBELET_PRIMARY_MASTER_HOSTNAME }}"
+  register: kubernetes_ca_cert_hash
+  run_once: true

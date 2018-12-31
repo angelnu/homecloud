@@ -10,6 +10,7 @@
    - [Odroid /Orange PI] (https://www.armbian.com/download/)
    - [Raspberry](https://github.com/hypriot/image-builder-rpi/releases/)
 2. Setup ssh access to root using an ssh key
+3. Install python
 3. (optional) Mount /media/data to a large enough folder. Most of the data will go here, including the glusterfs bricks
 4. edit hosts
 5. (optional) edit group_vars

@@ -35,23 +35,10 @@
               dhcp6: yes
               addresses: [192.168.2.3/24]
               gateway4: 192.168.2.1
+              nameservers:
+                search: [fritz.box]
+                addresses: [192.168.2.1, 9.9.9.9]
     register: result
-
-  - name: "Generate network setup"
-    shell: netplan apply
-    when: result|changed
-
-  - name: "Add data mount"
-    blockinfile:
-      path: /etc/fstab
-      insertafter: EOF
-      marker: "# {mark} ANSIBLE MANAGED BLOCK - DATA MOUNT"
-      block: UUID=b1fa2c12-bb07-4d3e-a9f2-be84c20040e2 /media/data btrfs relatime,compress=lzo,subvol=@ 0 0
-    register: result
-
-  - name: "Mount /media/data"
-    shell: mkdir -p /media/data; umount /media/data;mount /media/data
-    when: result|changed
 
 - name: Setup Systems to run Kubernetes
   hosts: all

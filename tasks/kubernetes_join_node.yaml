@@ -1,0 +1,41 @@
+- name: Get Kubernetes nodes
+  include_tasks: kubernetes_get_nodes.yaml
+
+- name: Reset cluster if {{ KUBEADM_CFG }} changed
+  shell:
+    kubeadm reset -f
+  #we cannot reset here for master or we will loose certs
+  when: not node_admin and inventory_hostname not in kubernetes_get_nodes_result.stdout
+
+- name: Get Kubernetes token
+  include_tasks: kubernetes_get_token.yaml
+  when: ansible_hostname not in kubernetes_get_nodes_result.stdout
+  #we must always run this (need output bellow)
+
+
+- name: "Resolv {{ KUBEADM_APISERVER_HOST }} to original IP"
+  blockinfile:
+    path: /etc/hosts
+    block: |
+      #Disabled for install: 127.0.0.1 {{ KUBEADM_APISERVER_HOST }}
+  when: ansible_hostname not in kubernetes_get_nodes_result.stdout
+
+- name: Join node
+  shell:
+    kubeadm join
+      --token {{kubernetes_token.stdout}}
+      --node-name={{item}}
+      --discovery-token-ca-cert-hash sha256:{{kubernetes_ca_cert_hash.stdout}}
+      {{ '--experimental-control-plane' if node_admin else '' }}
+      {{ KUBELET_PRIMARY_MASTER_HOSTNAME }}:{{ KUBEADM_APISERVER_PORT }}
+  register: result
+  changed_when: result.stdout_lines | length
+  when: item not in kubernetes_get_nodes_result.stdout
+  # serial: 1 would be the proper solution here, but that can only be set on play level
+  # upstream issue: https://github.com/ansible/ansible/issues/12170
+  run_once: true
+  with_items: "{{ansible_play_batch}}"
+  delegate_to: "{{item}}"
+
+- name: Settle nodes
+  import_tasks: kubernetes_node_settle.yaml

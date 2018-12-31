@@ -30,7 +30,7 @@ Here is the hardware you will need to complete the project:
 
 ## Setup
 
-See [setup.md](setup.md)
+See [commands](commands.md)
 
 
 ## References

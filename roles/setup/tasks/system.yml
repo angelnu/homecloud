@@ -1,4 +1,14 @@
 # docker cli settings
+- name: Create Docker settings directory
+  file:
+    path: .docker
+    state: directory
+
+- name: Create Docker settings file
+  copy:
+    dest: ".docker/config.json"
+    content: |
+      {}
 - name: "Enable Docker experimental cli (docker manifest)"
   lineinfile:
     path: .docker/config.json
@@ -94,18 +104,43 @@
   register: result
   changed_when: result.stdout_lines | length
 
-# disable local dns server
-- name: Comment out the dnsmask
-  replace:
-    dest: /etc/NetworkManager/NetworkManager.conf
-    regexp: '^dns=dnsmasq'
-    replace: '#dns=dnsmasq'
+- name: swap - disable swap on Raspberry Pi
+  shell: "which dphys-swapfile || dphys-swapfile swapoff && dphys-swapfile uninstall && systemctl disable dphys-swapfile"
   register: result
+  when: result|changed
+  changed_when: result.stdout_lines | length
 
-- name: Restart Network Manager
-  systemd:
-    name: network-manager
-    state: restarted
-    enabled: yes
-    daemon_reload: yes
+- name: "Enable memory cgroup in Raspberry PIs"
+  shell: test ! -e cgroup_enable=memory || grep -v "cgroup_enable=memory" /boot/cmdline.txt && echo -n "cgroup_enable=memory cgroup_memory=1 $(cat /boot/cmdline.txt)">/boot/cmdline.txt
+  register: result
+  changed_when: result.stdout_lines | length
+
+- name: Reboot immediately if there was a change.
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
   when: result | changed
+
+- name: Wait for the reboot to complete if there was a change.
+  wait_for_connection:
+    connect_timeout: 20
+    sleep: 5
+    delay: 5
+    timeout: 300
+  when: result | changed
+
+# # disable local dns server
+# - name: Comment out the dnsmask
+#   replace:
+#     dest: /etc/NetworkManager/NetworkManager.conf
+#     regexp: '^dns=dnsmasq'
+#     replace: '#dns=dnsmasq'
+#   register: result
+#
+# - name: Restart Network Manager
+#   systemd:
+#     name: network-manager
+#     state: restarted
+#     enabled: yes
+#     daemon_reload: yes
+#   when: result | changed

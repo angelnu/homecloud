@@ -7,3 +7,4 @@
   changed_when:
   - not result.stdout|search("unchanged")
   - not result.stdout|search("configured")
+  when: production

@@ -3,34 +3,47 @@
 #
 ---
 
-#If set to true it will reset the K8S cluster
+#If set to true it will reset the K8S cluster on each run
 K8S_RESET: false
 
-KUBELET_PRIMARY_MASTER_HOSTNAME: "{{ groups['masters'][0] }}"
-KUBELET_SELFHOST: false
-KUBELET_DYN_CONFIG_PATH: /var/lib/kubelet/config/dynamic
-KUBELET_CHECKPOINT_PATH: /etc/kubernetes/checkpoint
-KUBELET_OPTS:
-  "--bootstrap-checkpoint-path={{KUBELET_CHECKPOINT_PATH}} --allow-privileged=true"
-KUBEADM_OPTS_INIT:
-#  "--ignore-preflight-errors=SystemVerification" #Ignore btrfs
-KUBEADM_APISERVER_EXTRAHOSTS: k8s.angelnu.com
+#kubeadm options
+KUBEADM_OPTS_INIT: #  "--ignore-preflight-errors=SystemVerification" #Ignore btrfs
+KUBEADM_APISERVER_HOST: "{{ 'k8s-api.angelnu.com' if production else 'k8s-test-api.angelnu.com' }}"
+KUBEADM_APISERVER_IP:   "{{ '192.168.2.201'       if production else '192.168.2.203'            }}"
+KUBEADM_APISERVER_PORT: 6443
 KUBEADM_CFG: /etc/kubernetes/kubeadmcfg.yaml
-#KUBEADM_OPTS:
-# "--feature-gates=HighAvailability=true\
-#  {{ ',SelfHosting=true,StoreCertsInSecrets=true' if KUBELET_SELFHOST else '' }}"
-#cidr: 10.244.0.0/16
 
-#Image to use for the proxy - needed to be multi-arch since proxy runs on all nodes
-K8S_PROXY_IMAGE: angelnu/kube-proxy:v1.11.1
-K8S_DASHBOARD_IMAGE: angelnu/kubernetes-dashboard:v1.8.3
+#Kubelet options
+KUBELET_OPTS: " --allow-privileged=true"
 
-#Peer ID of the first etcd Peer
-ETCD_FIRST_PEER: a874c87fd42044f
+# Kubernetes dashboard
+K8S_DASHBOARD_IMAGE: angelnu/kubernetes-dashboard:v1.10.0
+
+timezone: "Europe/Berlin"
+ssh:
+  pub_key_path: "~/.ssh/id_rsa.pub"
+PACKAGES:
+  - docker-ce=5:18.09.*
+  - kubeadm=1.13*
+  - kubelet=1.13*
+  - kubectl=1.13*
+  - rsync
+  - glusterfs-client
+  - nfs-common
+  - attr
+  - conntrack
+PACKAGES2REMOVE:
+  - zram-config
+  - sendmail-base
+  - libnss-mdns #It uses multicast dns to resol .local -> conflicts with k8s dns names: https://askubuntu.com/questions/81797/nslookup-finds-ip-but-ping-doesnt
+
+
+
+# Generated
+KUBELET_PRIMARY_MASTER_HOSTNAME: "{{ groups['masters'][0] }}"
 
 #K8S files in the server
 K8S_ETC_PATH: /etc/kubernetes
-K8S_ETCD_CFG_PATH: /etc/kubernetes/manifests/etcd.yaml
 K8S_KUBELET_CFG_PATH: /etc/kubernetes/kubelet.conf
 K8S_ADMIN_CFG_PATH: /etc/kubernetes/admin.conf
 

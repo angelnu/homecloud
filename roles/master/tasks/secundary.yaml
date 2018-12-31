@@ -1,9 +1,18 @@
-- name: Secundary - Create {{K8S_ETC_PATH}}/pki/etcd
+- name: Secondary - Get Kubernetes nodes
+  include_tasks: kubernetes_get_nodes.yaml
+
+- name: Secondary- Reset cluster if {{ KUBEADM_CFG }} changed
+  shell:
+    kubeadm reset -f
+  when: inventory_hostname not in kubernetes_get_nodes_result.stdout
+
+#Copy files
+- name: Secondary - Create {{K8S_ETC_PATH}}/pki/etcd
   file:
     path: "{{K8S_ETC_PATH}}/pki/etcd"
     state: directory
 
-- name: Secundary - Upload etcd certs
+- name: Secondary - Upload etcd certs
   synchronize:
     dest: "{{K8S_ETC_PATH}}/pki/etcd/"
     src: "{{ item }}"
@@ -11,7 +20,7 @@
     - ./kubeconfig/pki/etcd/ca.crt
     - ./kubeconfig/pki/etcd/ca.key
 
-- name: Secundary - Upload kube certs
+- name: Secondary - Upload kube certs
   synchronize:
     dest: "{{K8S_ETC_PATH}}/pki/"
     src: "{{ item }}"
@@ -23,60 +32,8 @@
     - ./kubeconfig/pki/front-proxy-ca.crt
     - ./kubeconfig/pki/front-proxy-ca.key
 
-# - name: "Upload {{K8S_ADMIN_CFG_PATH}}"
-#   synchronize:
-#     dest: "{{K8S_ADMIN_CFG_PATH}}"
-#     src: "./kubeconfig/admin.conf"
-
-- name: Secundary - Init certs
-  shell:
-    kubeadm alpha phase certs all --config {{ KUBEADM_CFG }}
-    creates="{{K8S_ETC_PATH}}/pki/etcd/peer.crt"
-
-- name: Secundary - kubelet config write-to-disk
-  shell:
-    kubeadm alpha phase kubelet config write-to-disk --config {{ KUBEADM_CFG }}
-  when: kubelet_st.stat.exists == False
-
-- name: Secundary - kubelet write-env-file
-  shell:
-    kubeadm alpha phase kubelet write-env-file --config {{ KUBEADM_CFG }}
-  when: kubelet_st.stat.exists == False
-
-- name: Secundary - kubeconfig kubelet
-  shell:
-    kubeadm alpha phase kubeconfig all --config {{ KUBEADM_CFG }}
-  when: kubelet_st.stat.exists == False
-
-- name: Secundary - controlplane all
-  shell:
-    kubeadm alpha phase controlplane all --config {{ KUBEADM_CFG }}
-  when: kubelet_st.stat.exists == False
-
-- name: Secundary - Start kubelet
-  systemd: state=started name=kubelet daemon_reload=yes
-
-- name: Secundary - Create etcd manifest
-  shell:
-    kubeadm alpha phase etcd local --config {{ KUBEADM_CFG }}
-  when: kubelet_st.stat.exists == False
-
-- name: "Secundary - Add etcd peer to exisiting etcd cluster - kubectl -n kube-system exec etcd-{{ KUBELET_PRIMARY_MASTER_HOSTNAME }} -- /bin/sh -ec '{{ ETCD_BIN }} member add {{item}} --peer-urls=https://{{hostvars[item].ansible_default_ipv4.address}}:2380'"
-  shell: "kubectl -n kube-system exec etcd-{{ KUBELET_PRIMARY_MASTER_HOSTNAME }} -- /bin/sh -ec '{{ ETCD_BIN }} member add {{item}} --peer-urls=https://{{hostvars[item].ansible_default_ipv4.address}}:2380'"
-  environment: "{{KUBECTL_ENV}}"
-  delegate_to: "{{KUBELET_PRIMARY_MASTER_HOSTNAME}}"
-  register: result
-  changed_when: "'Peer URLs already exists' not in result.stderr"
-  failed_when: "result.rc and 'Peer URLs already exists' not in result.stderr"
-  until: "result == 0 or 'Peer URLs already exists' in result.stderr"
-  retries: 60
-  delay: 5
-  # serial: 1 would be the proper solution here, but that can only be set on play level
-  # upstream issue: https://github.com/ansible/ansible/issues/12170
-  run_once: true
-  with_items: "{{groups['masters'][1:]}}"
-
-- name: Secundary - mark-master
-  shell:
-    kubeadm alpha phase mark-master --config {{ KUBEADM_CFG }}
-  when: kubelet_st.stat.exists == False
+#Actual join
+- name: "Secondary - join nodes"
+  include_tasks: kubernetes_join_node.yaml
+  vars:
+    node_admin: True

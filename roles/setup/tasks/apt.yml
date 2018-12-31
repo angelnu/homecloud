@@ -13,10 +13,21 @@
     repo: deb https://download.docker.com/linux/{{ansible_distribution|lower}} {{ ansible_distribution_release }} stable
     state: present
 
-- name: Add Glusterfs 3.13 PPA
+- name: Add Glusterfs 5 PPA (Ubuntu)
   apt_repository:
-    repo: ppa:gluster/glusterfs-3.13
+    repo: ppa:gluster/glusterfs-5
     state: present
+  when: ansible_distribution == 'Ubuntu'
+
+- name: 'import Glusterfs signing key'
+  apt_key:
+    url: http://download.gluster.org/pub/gluster/glusterfs/5/rsa.pub
+
+- name: Add Glusterfs 5 repo (Debian)
+  apt_repository:
+    repo: deb https://download.gluster.org/pub/gluster/glusterfs/LATEST/Debian/{{ansible_distribution_major_version}}/{{'arm64' if 'arm' in ansible_architecture else 'amd64'}}/apt {{ ansible_distribution_release }} stable
+    state: present
+  when: ansible_distribution == 'Debian'
 
 - name: Add Kubernetes Repo Key
   apt_key:

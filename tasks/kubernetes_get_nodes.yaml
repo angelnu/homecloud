@@ -1,0 +1,7 @@
+- name: Get Kubernetes nodes
+  shell: "kubectl get nodes"
+  environment: "{{ KUBECTL_ENV }}"
+  delegate_to: "{{ KUBELET_PRIMARY_MASTER_HOSTNAME }}"
+  changed_when: False
+  run_once: true
+  register: kubernetes_get_nodes_result

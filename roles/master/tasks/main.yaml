@@ -1,71 +1,3 @@
-- name: "Generate etcd initial_cluster string"
-  set_fact:
-    etcd_initial_cluster: "\
-      {% set ns = namespace(continue=true) %}\
-      {% for host in groups['masters'] %}\
-        {% if ns.continue %}\
-          {{ hostvars[host].inventory_hostname }}=https://{{ hostvars[host].ansible_default_ipv4.address }}:2380\
-          {% if host|string() == inventory_hostname|string() %}\
-            {% set ns.continue = false %}\
-          {% else %}\
-            ,\
-          {% endif %}\
-        {% endif %}\
-      {% endfor %}"
-    master_SANs: |
-      {% for host in groups['masters'] %}
-      - {{ hostvars[host].inventory_hostname }}
-      - {{ hostvars[host].ansible_default_ipv4.address }}
-      {% endfor %}
-
-- name: Create kubeadm config
-  blockinfile:
-    path: "{{ KUBEADM_CFG }}"
-    create: yes
-    block: |
-      apiVersion: kubeadm.k8s.io/v1alpha2
-      kind: MasterConfiguration
-      kubernetesVersion: v1.11.0
-      apiServerCertSANs:
-      - {{KUBEADM_APISERVER_EXTRAHOSTS}}
-      - localhost
-      - 127.0.0.1
-      {{ master_SANs }}
-      api:
-          controlPlaneEndpoint: {{inventory_hostname}}
-      etcd:
-        local:
-          extraArgs:
-            listen-client-urls: "https://localhost:2379,https://{{ ansible_default_ipv4.address }}:2379"
-            advertise-client-urls: "https://{{ ansible_default_ipv4.address }}:2379"
-            listen-peer-urls: "https://{{ansible_default_ipv4.address}}:2380"
-            initial-advertise-peer-urls: "https://{{ ansible_default_ipv4.address }}:2380"
-            initial-cluster: "{{etcd_initial_cluster}}"
-      {% if KUBELET_PRIMARY_MASTER_HOSTNAME|string() != inventory_hostname|string() %}
-            initial-cluster-state: existing
-      {% endif %}
-
-          serverCertSANs:
-            - {{inventory_hostname}}
-            - {{ansible_default_ipv4.address}}
-          peerCertSANs:
-            - {{inventory_hostname}}
-            - {{ansible_default_ipv4.address}}
-      #networking:
-      #    # This CIDR is a Calico default. Substitute or remove for your CNI provider.
-      #    podSubnet: "192.168.0.0/16"
-  register: kubeadm_cfg
-
-- name: Reset cluster if {{ KUBEADM_CFG }} changed
-  shell:
-    kubeadm reset -f
-  when: kubeadm_cfg|changed
-
-- name: Check Kubelet config file - {{K8S_KUBELET_CFG_PATH}}
-  stat:
-    path: "{{K8S_KUBELET_CFG_PATH}}"
-  register: kubelet_st
-
 - name: "Run tasks for primary"
   include_tasks: primary.yaml
   when: inventory_hostname == KUBELET_PRIMARY_MASTER_HOSTNAME
@@ -74,8 +6,19 @@
   include_tasks: secundary.yaml
   when: inventory_hostname != KUBELET_PRIMARY_MASTER_HOSTNAME
 
+- name: "Resolv {{ KUBEADM_APISERVER_HOST }} to localhost"
+  blockinfile:
+    path: /etc/hosts
+    block: |
+      127.0.0.1 {{ KUBEADM_APISERVER_HOST }}
+
+- name: Redeploy keepalived
+  include_tasks: apiLoadBalancer.yaml
+  vars:
+    keepalive_rest_node: False
+
 - name: "Dispatch tasks to master"
   include_tasks: asWorker.yaml
 
-# - name: end
-#   shell: "/bin/false"
+- name: Deploy dashboard
+  import_tasks: dashboard.yaml

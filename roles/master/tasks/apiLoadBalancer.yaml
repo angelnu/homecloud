@@ -1,0 +1,66 @@
+- name: Install load balancer for {{ KUBEADM_APISERVER_IP }} and keepalive_rest_node={{ keepalive_rest_node }}
+  environment: "{{KUBECTL_ENV}}"
+  register: result
+  failed_when:
+  - "'AlreadyExists' not in result.stderr"
+  - result.rc != 0
+  changed_when:
+  - not result.stdout|search("unchanged")
+  - not result.stdout|search("configured")
+  run_once: true
+  shell: kubectl apply -f -
+  #shell: tee /dev/null ; fooooo
+  args:
+    stdin: |
+      apiVersion: apps/v1
+      kind: DaemonSet
+      metadata:
+        namespace: kube-system
+        labels:
+          app: keepalived-k8s-api
+        name: keepalived-k8s-api
+      spec:
+        selector:
+          matchLabels:
+            app: keepalived-k8s-api
+        updateStrategy:
+          type: RollingUpdate
+        template:
+          metadata:
+            namespace: kube-system
+            labels:
+              app: keepalived-k8s-api
+          spec:
+            hostNetwork: true
+            #Only run in the masters
+            tolerations:
+            - effect: NoSchedule
+              key: node-role.kubernetes.io/master
+            nodeSelector:
+              node-role.kubernetes.io/master: ""
+              # limit to keepalive_rest_node if present - used to limit to primary master during deployment
+              {{ 'kubernetes.io/hostname: "' + keepalive_rest_node + '"' if keepalive_rest_node else '' }}
+            containers:
+            - name: keepalived-k8s-api
+              image: angelnu/keepalived:latest
+              imagePullPolicy: Always
+              resources:
+                requests:
+                  memory: "4Mi"
+                  cpu: "2m"
+                limits:
+                  #memory: "128Mi"
+                  #cpu: "500m"
+              securityContext:
+                privileged: true
+              env:
+              #- name: KEEPALIVED_PRIORITY
+              #  value: "$(${HOSTIP}|cut -d. -f4)"
+              - name: HOST_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.hostIP
+              - name: KEEPALIVED_VIRTUAL_IP
+                value: "{{ KUBEADM_APISERVER_IP }}"
+              - name: KEEPALIVED_PASSWORD
+                value: "{{ lookup("password", "settings/credentials/keepalived-k8s-api length=15") }}"

@@ -1,5 +1,5 @@
 - name: Reset Kubernetes installation
-  shell: "kubeadm reset -f; rm -rf {{KUBELET_CHECKPOINT_PATH}}"
+  shell: "kubeadm reset -f"
 
 - name: Remove Weave DB and plugins
   shell: "rm -rf /var/lib/weave /opt/cni/bin/weave-*" #with_fileglob did not work:   https://github.com/ansible/ansible/issues/17136

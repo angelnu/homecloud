@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iobroker-dev
+spec:
+  selector:
+    matchLabels:
+      app: iobroker-dev
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: iobroker-dev
+      annotations:
+        container.apparmor.security.beta.kubernetes.io/iobroker-dev: unconfined
+      labels:
+        app: iobroker-dev
+    spec:
+      hostname: iobroker-dev
+      containers:
+      - name: iobroker-dev
+        image: angelnu/iobroker:full-latest
+        imagePullPolicy: Always
+        # command:
+        #   - sh
+        #   - -c
+        #   - while [ 1 ]; do sleep 10;done
+        resources:
+          requests:
+            memory: "800Mi"
+            cpu: "50m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
+        ports:
+        - containerPort: 8081 #original admin
+        - containerPort: 8082 #original vis
+        - containerPort: 8084 #original io sockets
+        - containerPort: 8087 #original SimpleAPI
+        - containerPort: 30000 #hrpc.0
+        - containerPort: 30001 #hrpc.1
+        - containerPort: 30181 #Reconfigured admin
+        - containerPort: 30182 #Reconfigured vis
+        - containerPort: 30187 #Reconfigured SimpleAPI
+        livenessProbe:
+          tcpSocket:
+            port: 30181
+          initialDelaySeconds: 600 # 10 minutes
+          timeoutSeconds: 10
+          failureThreshold: 12 # 2 minutes
+        env:
+        - name: TZ
+          value: Europe/Berlin
+        volumeMounts:
+        - mountPath: /opt/iobroker/iobroker-data
+          name: iobroker-volume
+          subPath: downloaders/iobroker/iobroker-data
+        - mountPath: /etc/localtime_host
+          name: localtime-volume
+        securityContext:
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - DAC_READ_SEARCH
+      volumes:
+        - name: iobroker-volume
+          persistentVolumeClaim:
+            claimName: nfs-kubernetes
+        - name: localtime-volume
+          hostPath:
+            path: /etc/localtime
+            type: File
+        #- name: logs
+        #  emptyDir: {}
+
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: iobroker-dev
+  name: iobroker-dev
+spec:
+  ports:
+  - name: admin
+    port: 30181
+    targetPort: 30181
+    nodePort: 30181
+  - name: vis
+    port: 30182
+    targetPort: 30182
+    nodePort: 30182
+  - name: api
+    port: 30187
+    targetPort: 30187
+    nodePort: 30187
+  - name: rfdclient0
+    port: 30000
+  - name: rfdclient1
+    port: 30101
+  - name: admin-org
+    port: 8081
+    targetPort: 8081
+  - name: vis-org
+    port: 8082
+    targetPort: 8082
+  - name: iosocket-org
+    port: 8084
+    targetPort: 8084
+  type: NodePort
+  selector:
+    app: iobroker-dev
+
+---
+
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: iobroker-dev
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
+spec:
+  rules:
+  - host: iobroker-dev.home.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: iobroker-dev
+          servicePort: vis
