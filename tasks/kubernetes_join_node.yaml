@@ -12,12 +12,9 @@
   when: ansible_hostname not in kubernetes_get_nodes_result.stdout
   #we must always run this (need output bellow)
 
-
-- name: "Resolv {{ KUBEADM_APISERVER_HOST }} to original IP"
-  blockinfile:
-    path: /etc/hosts
-    block: |
-      #Disabled for install: 127.0.0.1 {{ KUBEADM_APISERVER_HOST }}
+- include_tasks: kubernetes_set_k8s_api.yaml
+  vars:
+    KUBEADM_APISERVER_IP: "{{hostvars[groups['masters'][0]].ansible_default_ipv4.address}}"
   when: ansible_hostname not in kubernetes_get_nodes_result.stdout
 
 - name: Join node
@@ -37,5 +34,16 @@
   with_items: "{{ansible_play_batch}}"
   delegate_to: "{{item}}"
 
+- wait_for: port={{ KUBEADM_APISERVER_PORT }}
+  when: node_admin
+
+- uri:
+    url: https://localhost:{{ KUBEADM_APISERVER_PORT }}
+    status_code: 403
+    timeout: 600
+    validate_certs: False
+  retries: 60
+  when: node_admin
+
 - name: Settle nodes
-  import_tasks: kubernetes_node_settle.yaml
+  include_tasks: kubernetes_node_settle.yaml

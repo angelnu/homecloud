@@ -1,5 +1,6 @@
 - name: Load all services to cluster
   shell: "kubectl apply -R -f  services"
+  delegate_to: localhost
   environment: "{{ LOCAL_KUBECTL_ENV }}"
   register: result
   vars:
@@ -7,4 +8,4 @@
   changed_when:
   - not result.stdout|search("unchanged")
   - not result.stdout|search("configured")
-  when: production
+  run_once: True

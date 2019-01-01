@@ -1,0 +1,24 @@
+- name: Reset Kubernetes installation
+  shell: |
+    kubeadm reset -f
+    #with_fileglob did not work:   https://github.com/ansible/ansible/issues/17136
+    rm -rf /var/lib/weave /opt/cni/bin/weave-*
+    echo "Deleting {{KUBEADM_APISERVER_IP}}"
+    for dev in $(ip addr list | awk -F': ' '/^[0-9]/ {print $2}'); do
+      if ip addr list dev $dev 2>/dev/null|grep -q {{KUBEADM_APISERVER_IP}}; then
+        echo 'Deleting {{KUBEADM_APISERVER_IP}} from '$dev
+        ip addr del {{KUBEADM_APISERVER_IP}} dev $dev
+      fi
+    done
+
+# - name: Reboot in order to reset
+#   shell: sleep 2 && shutdown -r now
+#   async: 1
+#   poll: 0
+# - name: Wait for server come back
+#   wait_for: >
+#     host={{ inventory_hostname }}
+#     port=22
+#     delay=15
+#     timeout=600
+#   delegate_to: localhost

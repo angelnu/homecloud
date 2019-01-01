@@ -1,24 +1,23 @@
 - name: "Resetting if required"
   hosts: nodes
   tasks:
-    - import_role: name=reset
+    - import_role: name=k8s-reset-node
       when: K8S_RESET
 
 - name: Kubernetes master configuration
   hosts: masters
   gather_facts: false #Already queried
   tasks:
-    - import_role: name=master
+    - import_role: name=k8s-master
 
 - name: Add workers
   hosts: workers
   gather_facts: false #Already queried
   tasks:
-    - import_role: name=workers
+    - import_role: name=k8s-worker
 
-- name: Update all kubernetes services
-  hosts: 127.0.0.1
-  connection: local
-  gather_facts: false
+- name: Set K8S nodes (labels, services)
+  hosts: nodes
+  gather_facts: false #Already queried
   tasks:
-  - import_role: name=load-services
+    - import_role: name=k8s-initialized-node

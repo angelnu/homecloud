@@ -3,7 +3,7 @@
 
 - name: Secondary- Reset cluster if {{ KUBEADM_CFG }} changed
   shell:
-    kubeadm reset -f
+    kubeadm reset -f #Do not use the full reset role to keep the certs
   when: inventory_hostname not in kubernetes_get_nodes_result.stdout
 
 #Copy files

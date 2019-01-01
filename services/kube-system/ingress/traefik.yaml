@@ -73,6 +73,9 @@ spec:
       labels:
         app: traefik
     spec:
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
       serviceAccountName: traefik
       terminationGracePeriodSeconds: 60
       hostNetwork: true

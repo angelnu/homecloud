@@ -1,0 +1,5 @@
+- name: "Resolv {{ KUBEADM_APISERVER_HOST }} to {{ KUBEADM_APISERVER_IP }}"
+  blockinfile:
+    path: /etc/hosts
+    block: |
+      {{ KUBEADM_APISERVER_IP }} {{ KUBEADM_APISERVER_HOST }}

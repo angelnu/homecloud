@@ -48,7 +48,42 @@ spec:
       labels:
         app: "etcd"
     spec:
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
       affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: masterIndex
+                operator: In
+                values:
+                - "0"
+                - "1"
+                - "2"
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                - key: masterIndex
+                  operator: In
+                  values:
+                  - "0"
+            - weight: 50
+              preference:
+                matchExpressions:
+                - key: masterIndex
+                  operator: In
+                  values:
+                  - "1"
+            - weight: 1
+              preference:
+                matchExpressions:
+                - key: masterIndex
+                  operator: In
+                  values:
+                  - "2"
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
@@ -59,8 +94,6 @@ spec:
                 - etcd
             topologyKey: "kubernetes.io/hostname"
       terminationGracePeriodSeconds: 5
-      nodeSelector:
-        beta.kubernetes.io/arch: arm
       containers:
       - name: "etcd"
         #image: angelnu/etcd:3.1.17

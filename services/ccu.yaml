@@ -17,9 +17,12 @@ spec:
         app: ccu
     spec:
       hostname: ccu
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
       nodeSelector:
         beta.kubernetes.io/arch: arm
-        hmip: "true"
+        HmIP: "True"
       containers:
       - name: ccu
         image: angelnu/ccu:3

@@ -14,10 +14,21 @@
       controlPlaneEndpoint: "{{ KUBEADM_APISERVER_HOST }}:{{ KUBEADM_APISERVER_PORT }}"
   register: kubeadm_cfg
 
-- name: Primary - Reset cluster if {{ KUBEADM_CFG }} changed
-  shell:
-    kubeadm reset -f
+- name: Primary - Reset full cluster if {{ KUBEADM_CFG }} changed
+  include_role: name=k8s-reset-node
+  # shell: |
+  #   kubeadm reset -f
+  #   rm -f {{ KUBEADM_CFG }}
+  #   echo "Deleting {{KUBEADM_APISERVER_IP}}"
+  #   for dev in $(ip addr list | awk -F': ' '/^[0-9]/ {print $2}'); do
+  #     if ip addr list dev $dev 2>/dev/null|grep -q {{KUBEADM_APISERVER_IP}}; then
+  #       echo 'Deleting {{KUBEADM_APISERVER_IP}} from '$dev
+  #       ip addr del {{KUBEADM_APISERVER_IP}} dev $dev
+  #     fi
+  #   done
   when: kubeadm_cfg|changed
+  delegate_to: "{{item}}"
+  with_items: "{{ansible_play_batch}}"
 
 - name: Primary - Check Kubelet config file - {{K8S_KUBELET_CFG_PATH}}
   stat:
@@ -30,11 +41,20 @@
     creates="{{K8S_KUBELET_CFG_PATH}}"
   when: kubelet_st.stat.exists == False
 
+- name: Primary - Set all nodes to use {{hostvars[KUBELET_PRIMARY_MASTER_HOSTNAME].ansible_default_ipv4.address}} for {{KUBEADM_APISERVER_HOST}}
+  include_tasks: kubernetes_set_k8s_api.yaml
+  vars:
+    KUBEADM_APISERVER_IP: "{{hostvars[KUBELET_PRIMARY_MASTER_HOSTNAME].ansible_default_ipv4.address}}"
+  delegate_to: "{{item}}"
+  with_items: "{{ansible_play_batch}}"
+  when: kubelet_st.stat.exists == False
+
 - name: Primary - Deploy keepalived
   include_tasks: apiLoadBalancer.yaml
   when: kubelet_st.stat.exists == False
   vars:
-    keepalive_rest_node: "{{KUBELET_PRIMARY_MASTER_HOSTNAME}}"
+    keepalive_rest_node: False
+    #keepalive_rest_node: "{{KUBELET_PRIMARY_MASTER_HOSTNAME}}"
 
 - name: Primary - Adding network backend - Weave Net
   #shell: "kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.1.3/weave-daemonset.yaml"
