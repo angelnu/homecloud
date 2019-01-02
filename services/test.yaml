@@ -11,9 +11,13 @@ spec:
     imagePullPolicy: Always
     command:
     - "/bin/sh"
-    - "-ec"
+    - "-c"
     - |
-      while [ 1 ]; do sleep 2;done
+      trap 'exit' INT TERM
+      while [ 1 ]; do
+        sleep 600 &
+        wait $!
+      done
     resources:
       requests:
         memory: "2Mi"

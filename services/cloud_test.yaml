@@ -1,0 +1,99 @@
+# ------------------- CronJob ------------------- #
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cloud-automated-test
+spec:
+  schedule: "0 5 * * *"
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: cloud-automated-test
+        spec:
+          containers:
+            - name: cloud-automated-test
+              image: ansible/ansible:default
+              imagePullPolicy: Always
+              workingDir: /root
+              command:
+              - "/bin/sh"
+              - "-ecx"
+              - |
+                trap 'exit' INT TERM
+                cp -av .sshro .ssh
+                ssh-keyscan github.com > /root/.ssh/known_hosts
+                git clone --recursive https://github.com/angelnu/homecloud.git
+                pip install ansible
+                while [ 1 ]; do
+                  sleep 600 &
+                  wait $!
+                done
+                cd homecloud
+                ./bin/test_all.sh
+              resources:
+                requests:
+                  memory: "10Mi"
+                  cpu: "5m"
+                limits:
+                  #memory: "128Mi"
+                  #cpu: "500m"
+          restartPolicy: Never
+---
+# ------------------- Test Job ------------------- #
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  labels:
+    app: cloud-manual-test
+  name: cloud-manual-test
+spec:
+  serviceName: cloud-manual-test
+  # changing replicas value will require a manual etcdctl member remove/add
+  # command (remove before decreasing and add after increasing)
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      name: cloud-manual-test
+      labels:
+        app: cloud-manual-test
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: cloud-manual-test
+        image: python
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "5Mi"
+            cpu: "2m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
+        workingDir: /root
+        command:
+        - "/bin/sh"
+        - "-c"
+        - |
+          trap 'exit' INT TERM
+          cp -av .sshro .ssh
+          ssh-keyscan github.com > /root/.ssh/known_hosts
+          git clone --recursive https://github.com/angelnu/homecloud.git
+          pip install ansible
+          while [ 1 ]; do
+            sleep 600 &
+            wait $!
+          done
+        volumeMounts:
+        - name: ssh-key-volume
+          mountPath: "/root/.sshro"
+      volumes:
+      - name: ssh-key-volume
+        secret:
+          secretName: git-ssh-keys
+          defaultMode: 0700

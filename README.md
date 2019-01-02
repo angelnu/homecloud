@@ -2,7 +2,7 @@
 
 Creates/Updates my private cloud based on Kubernetes and deploy my services on it.
 
-- Support HA Kubernetes cluster on hybrid architectures (I run masters on K8S and a big worker on Intel)
+- Support HA Kubernetes cluster on hybrid architectures (I run masters on ARM and a big worker on Intel)
 - Many services: see the [services](services) folder
   - [Iobroker](https://github.com/ioBroker/ioBroker) for home automation
   - Ingress based on [Traefik](https://traefik.io/)

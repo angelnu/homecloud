@@ -38,7 +38,7 @@ spec:
             - ping
             - -c1
             - -w15
-            - server.angelnu.com
+            - google.com
           initialDelaySeconds: 60
           periodSeconds: 300
           failureThreshold: 2

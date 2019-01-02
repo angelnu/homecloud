@@ -40,9 +40,11 @@
 - uri:
     url: https://localhost:{{ KUBEADM_APISERVER_PORT }}
     status_code: 403
-    timeout: 600
+    timeout: 60
     validate_certs: False
   retries: 60
+  delay: 5
+  changed_when: false
   when: node_admin
 
 - name: Settle nodes

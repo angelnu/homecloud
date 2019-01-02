@@ -1,0 +1,24 @@
+- name: "Run tasks for primary"
+  include_tasks: primary.yaml
+  when: inventory_hostname == KUBELET_PRIMARY_MASTER_HOSTNAME
+
+- name: "Run tasks for secundaries"
+  include_tasks: secundary.yaml
+  when: inventory_hostname != KUBELET_PRIMARY_MASTER_HOSTNAME
+
+- name: "Dispatch tasks to master"
+  include_tasks: asWorker.yaml
+
+- name: Deploy dashboard
+  import_tasks: dashboard.yaml
+
+- include_tasks: kubernetes_set_k8s_api.yaml
+  vars:
+    #KUBEADM_APISERVER_IP: "#Dissabled -> use {{ KUBEADM_APISERVER_HOST }}"
+    KUBEADM_APISERVER_IP: 127.0.0.1 #Each master should connect to its own REST API server
+
+# Not needed: already deployed to all masters by primary
+# - name: Redeploy keepalived
+#   include_tasks: apiLoadBalancer.yaml
+#   vars:
+#     keepalive_rest_node: False

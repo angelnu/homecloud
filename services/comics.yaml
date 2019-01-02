@@ -67,9 +67,14 @@ spec:
             #memory: "128Mi"
             #cpu: "500m"
         command:
-          - sh
-          - -c
-          - while [ 1 ]; do sleep 10;done
+        - "/bin/sh"
+        - "-c"
+        - |
+          trap 'exit' INT TERM
+          while [ 1 ]; do
+            sleep 600 &
+            wait $!
+          done
         volumeMounts:
           - mountPath: /data
             name: comics
