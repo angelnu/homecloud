@@ -1,5 +1,5 @@
-- name: Update HypriotOS and Kubernetes components
+- name: Update HW OS
   hosts: all
 
   tasks:
-    - import_role: name=update
+    - import_role: name=hw_update

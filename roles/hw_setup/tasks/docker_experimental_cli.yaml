@@ -1,0 +1,23 @@
+# docker cli settings
+- name: Create Docker settings directory
+  file:
+    path: .docker
+    state: directory
+
+- name: Check if .docker/config.json exists
+  stat:
+    path: .docker/config.json
+  register: docker_config_file_check
+
+- name: Create Docker settings file
+  when: not docker_config_file_check.stat.exists
+  copy:
+    dest: ".docker/config.json"
+    content: |
+      {}
+
+- name: "Enable Docker experimental cli (docker manifest)"
+  lineinfile:
+    path: .docker/config.json
+    insertafter: "^{"
+    line: '	"experimental": "enabled",'

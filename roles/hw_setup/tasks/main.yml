@@ -1,0 +1,27 @@
+- name: Add and update packages
+  import_tasks: apt.yaml
+
+- name: Enable experimental CLI for docker
+  import_tasks: docker_experimental_cli.yaml
+
+- name: Setup system parameters (boot, hosts, timzone)
+  import_tasks: system.yaml
+
+- name: Setup network parameters
+  import_tasks: network.yaml
+
+
+#Reboot if needed at the end
+- name: Reboot immediately if there was a change.
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+  when: need_reboot | default(False)
+
+- name: Wait for the reboot to complete if there was a change.
+  wait_for_connection:
+    connect_timeout: 20
+    sleep: 5
+    delay: 5
+    timeout: 300
+  when: need_reboot | default(False)

@@ -36,4 +36,5 @@ or
 - `kubectl update -f services`
 
 ### Testing
-Call `bin/test_all.sh` from the
+- Deploy the pub key to the test workers
+- Call `bin/test_all.sh` from the top git checkout folder.

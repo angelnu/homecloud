@@ -46,14 +46,12 @@
 
 - name: Install Packages
   apt:
-    name: "{{ item }}"
+    name: "{{PACKAGES}}"
     force: yes
     state: present
-  with_items: "{{PACKAGES}}"
 
 - name: Remove Packages
   apt:
-    name: "{{ item }}"
+    name: "{{ PACKAGES2REMOVE }}"
     force: yes
     state: absent
-  with_items: "{{PACKAGES2REMOVE}}"

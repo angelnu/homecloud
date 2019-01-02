@@ -17,6 +17,9 @@ spec:
             - name: cloud-automated-test
               image: ansible/ansible:default
               imagePullPolicy: Always
+              env:
+              - name: ANSIBLE_HOST_KEY_CHECKING
+                value: "False"
               workingDir: /root
               command:
               - "/bin/sh"
@@ -75,6 +78,9 @@ spec:
           limits:
             #memory: "128Mi"
             #cpu: "500m"
+        env:
+        - name: ANSIBLE_HOST_KEY_CHECKING
+          value: "False"
         workingDir: /root
         command:
         - "/bin/sh"
