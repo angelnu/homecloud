@@ -42,7 +42,9 @@
     status_code: 403
     timeout: 60
     validate_certs: False
-  retries: 60
+  register: result
+  until: result is not failed
+      retries: 60
   delay: 5
   changed_when: false
   when: node_admin
