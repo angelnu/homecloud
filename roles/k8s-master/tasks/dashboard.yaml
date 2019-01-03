@@ -8,8 +8,8 @@
   - "'AlreadyExists' not in result.stderr"
   - result.rc != 0
   changed_when:
-  - not result.stdout| join('') | search('unchanged-list')
-  - not result.stdout| join('') | search("configured")
+  - "'unchanged-list' not in result.stdout| join('')"
+  - "'configured'     not in result.stdout| join('')"
   run_once: true
 
 #TBD: this is only needed until they make the dashboard multiarch
@@ -17,5 +17,5 @@
   shell: "kubectl -n kube-system set image deployment kubernetes-dashboard *={{ K8S_DASHBOARD_IMAGE }}"
   environment: "{{KUBECTL_ENV}}"
   delegate_to: "{{ KUBELET_PRIMARY_MASTER_HOSTNAME }}"
-  changed_when: result | changed #Use the changed status from the deploy since this will always change it
+  changed_when: result is changed #Use the changed status from the deploy since this will always change it
   run_once: true

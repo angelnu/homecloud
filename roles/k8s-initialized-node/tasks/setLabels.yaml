@@ -8,5 +8,4 @@
   environment: "{{ LOCAL_KUBECTL_ENV }}"
   register: result
   changed_when:
-  - not result.stdout|search("unchanged")
-  - not result.stdout|search("configured")
+  - "'not labeled'  not in result.stdout| join('')"

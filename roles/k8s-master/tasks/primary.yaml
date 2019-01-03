@@ -53,8 +53,8 @@
   environment: "{{KUBECTL_ENV}}"
   register: result
   changed_when:
-  - not result.stdout|join('') |search("unchanged")
-  - not result.stdout|join('') |search("configured")
+  - "'unchanged'  not in result.stdout|join('')"
+  - "'configured' not in result.stdout|join('')"
 
 - name: Primary - Download {{K8S_ETC_PATH}}
   synchronize:
