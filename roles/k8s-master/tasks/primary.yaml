@@ -16,17 +16,7 @@
 
 - name: Primary - Reset full cluster if {{ KUBEADM_CFG }} changed
   include_role: name=k8s-reset-node
-  # shell: |
-  #   kubeadm reset -f
-  #   rm -f {{ KUBEADM_CFG }}
-  #   echo "Deleting {{KUBEADM_APISERVER_IP}}"
-  #   for dev in $(ip addr list | awk -F': ' '/^[0-9]/ {print $2}'); do
-  #     if ip addr list dev $dev 2>/dev/null|grep -q {{KUBEADM_APISERVER_IP}}; then
-  #       echo 'Deleting {{KUBEADM_APISERVER_IP}} from '$dev
-  #       ip addr del {{KUBEADM_APISERVER_IP}} dev $dev
-  #     fi
-  #   done
-  when: kubeadm_cfg|changed
+  when: kubeadm_cfg is changed
   delegate_to: "{{item}}"
   with_items: "{{ansible_play_batch}}"
 
@@ -63,8 +53,8 @@
   environment: "{{KUBECTL_ENV}}"
   register: result
   changed_when:
-  - not result.stdout|search("unchanged")
-  - not result.stdout|search("configured")
+  - not result.stdout|join('') |search("unchanged")
+  - not result.stdout|join('') |search("configured")
 
 - name: Primary - Download {{K8S_ETC_PATH}}
   synchronize:

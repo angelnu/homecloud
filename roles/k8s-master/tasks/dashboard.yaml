@@ -8,8 +8,8 @@
   - "'AlreadyExists' not in result.stderr"
   - result.rc != 0
   changed_when:
-  - not result.stdout|search("unchanged")
-  - not result.stdout|search("configured")
+  - not result.stdout| join('') | search('unchanged-list')
+  - not result.stdout| join('') | search("configured")
   run_once: true
 
 #TBD: this is only needed until they make the dashboard multiarch

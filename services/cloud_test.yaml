@@ -22,18 +22,19 @@ spec:
                 value: "False"
               workingDir: /root
               command:
-              - "/bin/sh"
-              - "-ecx"
+              - /bin/sh
+              - -ecx
               - |
                 trap 'exit' INT TERM
                 cp -av .sshro .ssh
                 ssh-keyscan github.com > /root/.ssh/known_hosts
                 git clone --recursive https://github.com/angelnu/homecloud.git
+
+                echo "Install dependencies"
                 pip install ansible
-                while [ 1 ]; do
-                  sleep 600 &
-                  wait $!
-                done
+                apt update;apt install -y rsync
+
+                echo "Run regression"
                 cd homecloud
                 ./bin/test_all.sh
               resources:
@@ -83,14 +84,19 @@ spec:
           value: "False"
         workingDir: /root
         command:
-        - "/bin/sh"
-        - "-c"
+        - /bin/sh
+        - -c
         - |
           trap 'exit' INT TERM
           cp -av .sshro .ssh
           ssh-keyscan github.com > /root/.ssh/known_hosts
           git clone --recursive https://github.com/angelnu/homecloud.git
+
+          echo "Install dependencies"
           pip install ansible
+          apt update;apt install -y rsync
+
+          echo "Infinite sleep"
           while [ 1 ]; do
             sleep 600 &
             wait $!
