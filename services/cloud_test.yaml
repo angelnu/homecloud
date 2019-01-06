@@ -14,37 +14,39 @@ spec:
           name: cloud-automated-test
         spec:
           containers:
-            - name: cloud-automated-test
-              image: ansible/ansible:default
-              imagePullPolicy: Always
-              env:
-              - name: ANSIBLE_HOST_KEY_CHECKING
-                value: "False"
-              workingDir: /root
-              command:
-              - /bin/sh
-              - -ecx
-              - |
-                trap 'exit' INT TERM
-                cp -av .sshro .ssh
-                ssh-keyscan github.com > /root/.ssh/known_hosts
-                git clone --recursive https://github.com/angelnu/homecloud.git
+          - name: cloud-automated-test
+            image: ansible/ansible:default
+            imagePullPolicy: Always
+            env:
+            - name: ANSIBLE_HOST_KEY_CHECKING
+              value: "False"
+            workingDir: /root
+            command:
+            - /bin/sh
+            - -ecx
+            - |
+              trap 'exit' INT TERM
+              cp -av .sshro .ssh
+              ssh-keyscan github.com > /root/.ssh/known_hosts
+              git clone --recursive https://github.com/angelnu/homecloud.git
 
-                echo "Install dependencies"
-                pip install ansible jmespath
-                apt update;apt install -y rsync
+              echo "Install dependencies"
+              pip install ansible jmespath
+              apt update;apt install -y rsync kubectl
 
-                echo "Run regression"
-                cd homecloud
-                ./bin/test_all.sh
-              resources:
-                requests:
-                  memory: "10Mi"
-                  cpu: "5m"
-                limits:
-                  #memory: "128Mi"
-                  #cpu: "500m"
+              echo "Run regression"
+              cd homecloud
+              ./bin/test_all.sh
+
+            volumeMounts:
+            - name: ssh-key-volume
+              mountPath: "/root/.sshro"
           restartPolicy: Never
+          volumes:
+          - name: ssh-key-volume
+            secret:
+              secretName: git-ssh-keys
+              defaultMode: 0700
 ---
 # ------------------- Test Job ------------------- #
 ---
@@ -94,7 +96,7 @@ spec:
 
           echo "Install dependencies"
           pip install ansible jmespath
-          apt update;apt install -y rsync
+          apt update;apt install -y rsync kubectl
 
           echo "Infinite sleep"
           while [ 1 ]; do
