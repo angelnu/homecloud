@@ -31,7 +31,13 @@ spec:
               git clone --recursive https://github.com/angelnu/homecloud.git
 
               echo "Install dependencies"
+              #Ansible
               pip install ansible jmespath
+              #Kubectl repo
+              apt-get update && apt-get install -y apt-transport-https
+              curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+              echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
+              #tools
               apt update;apt install -y rsync kubectl
 
               echo "Run regression"
@@ -95,7 +101,13 @@ spec:
           git clone --recursive https://github.com/angelnu/homecloud.git
 
           echo "Install dependencies"
+          #Ansible
           pip install ansible jmespath
+          #Kubectl repo
+          apt-get update && apt-get install -y apt-transport-https
+          curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+          echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
+          #tools
           apt update;apt install -y rsync kubectl
 
           echo "Infinite sleep"
