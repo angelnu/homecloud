@@ -58,6 +58,8 @@ spec:
         - containerPort: 8081
         # Virtual Devices
         - containerPort: 9292
+        # XmlRpc Server
+        - containerPort: 32001
         # livenessProbe:
         #   tcpSocket:
         #     port: 2001
@@ -66,23 +68,11 @@ spec:
         volumeMounts:
         - mountPath: /mnt
           name: ccu-volume
-        - mountPath: /dev
-          name: dev-volume
-        - mountPath: /sys
-          name: sys-volume
       volumes:
         - name: ccu-volume
           glusterfs:
             endpoints: glusterfs-storage
             path: ccu2
-        - name: dev-volume
-          hostPath:
-            path: /dev
-            type: Directory
-        - name: sys-volume
-          hostPath:
-            path: /sys
-            type: Directory
 
 ---
 # ------------------- Service ------------------- #
@@ -119,10 +109,15 @@ spec:
   - name: vdev
     port: 9292
     targetPort: 9292
-  type: NodePort
+  - name: xmlrpc-server
+    port: 32001
+    targetPort: 32001
+  #type: NodePort
+  type: LoadBalancer
+  loadBalancerIP: 192.168.2.232
+  sessionAffinity: ClientIP
   selector:
     app: ccu
-
 
 ---
 # ------------------- Ingress ------------------- #
