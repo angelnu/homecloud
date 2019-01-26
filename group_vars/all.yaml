@@ -42,6 +42,9 @@ PACKAGES2REMOVE:
 # Generated
 KUBELET_PRIMARY_MASTER_HOSTNAME: "{{ groups['masters'][0] }}"
 
+#Local K8S files
+K8S_LOCAL_KUBELET_CFG_PATH: "{{ './kubeconfig' if production else './kubeconfig-test' }}"
+
 #K8S files in the server
 K8S_ETC_PATH: /etc/kubernetes
 K8S_KUBELET_CFG_PATH: /etc/kubernetes/kubelet.conf
@@ -53,4 +56,4 @@ KUBECTL_ENV:
 
 #Environment varibles for kubectl
 LOCAL_KUBECTL_ENV:
-  KUBECONFIG: "./kubeconfig/admin.conf"
+  KUBECONFIG: "{{ K8S_LOCAL_KUBELET_CFG_PATH }}/admin.conf"

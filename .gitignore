@@ -1,4 +1,5 @@
 *.retry
 kubeconfig
+kubeconfig-test
 services/secrets
 .remote-sync.json
