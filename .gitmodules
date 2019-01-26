@@ -40,3 +40,6 @@
 [submodule "images/osixia-baseimage"]
 	path = images/osixia-baseimage
 	url = git@github.com:angelnu/docker-light-baseimage.git
+[submodule "images/apache-musicindex"]
+	path = images/apache-musicindex
+	url = git@github.com:angelnu/docker-apache-musicindex.git
