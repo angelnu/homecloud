@@ -1,5 +1,7 @@
 - include_tasks: setLabels.yaml
 
+- include_tasks: setTaints.yaml
+
 - name: Deploy services (only for production)
   include_tasks: deployServices.yaml
   when: production

@@ -1,12 +1,12 @@
 - name: Set labels
   shell: >
     kubectl label nodes {{inventory_hostname}} --overwrite
-    {% for key,value in k8s_labels.items() %}
-      {{ key }}={{ value }} \
+    {% for key,value in taints.items() %}
+      {{ key }}=true:{{ value }} \
     {% endfor %}
   delegate_to: localhost
   environment: "{{ LOCAL_KUBECTL_ENV }}"
   register: result
-  when: k8s_labels is defined
+  when: k8s_taints is defined
   changed_when:
   - "'not labeled'  not in result.stdout| join('')"
