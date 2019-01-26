@@ -15,22 +15,22 @@
 - name: Secondary - Upload etcd certs
   synchronize:
     dest: "{{K8S_ETC_PATH}}/pki/etcd/"
-    src: "{{ item }}"
+    src: "{{ K8S_LOCAL_KUBELET_CFG_PATH }}/{{ item }}"
   with_items:
-    - ./kubeconfig/pki/etcd/ca.crt
-    - ./kubeconfig/pki/etcd/ca.key
+    - pki/etcd/ca.crt
+    - pki/etcd/ca.key
 
 - name: Secondary - Upload kube certs
   synchronize:
     dest: "{{K8S_ETC_PATH}}/pki/"
-    src: "{{ item }}"
+    src: "{{ K8S_LOCAL_KUBELET_CFG_PATH }}/{{ item }}"
   with_items:
-    - ./kubeconfig/pki/sa.pub
-    - ./kubeconfig/pki/sa.key
-    - ./kubeconfig/pki/ca.crt
-    - ./kubeconfig/pki/ca.key
-    - ./kubeconfig/pki/front-proxy-ca.crt
-    - ./kubeconfig/pki/front-proxy-ca.key
+    - pki/sa.pub
+    - pki/sa.key
+    - pki/ca.crt
+    - pki/ca.key
+    - pki/front-proxy-ca.crt
+    - pki/front-proxy-ca.key
 
 #Actual join
 - name: "Secondary - join nodes"

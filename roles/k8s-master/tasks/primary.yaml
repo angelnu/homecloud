@@ -60,7 +60,7 @@
   synchronize:
     mode: pull
     src: "{{K8S_ETC_PATH}}/"
-    dest: "./kubeconfig"
+    dest: "{{ K8S_LOCAL_KUBELET_CFG_PATH }}"
 
 - name: Primary - settle node
   import_tasks: kubernetes_node_settle.yaml
