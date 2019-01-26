@@ -27,7 +27,7 @@
   apt_repository:
     repo: deb https://download.gluster.org/pub/gluster/glusterfs/LATEST/Debian/{{ansible_distribution_major_version}}/{{'arm64' if 'arm' in ansible_architecture else 'amd64'}}/apt {{ ansible_distribution_release }} stable
     state: present
-  when: ansible_distribution == 'Debian'
+  when: ansible_distribution == 'Debian NO'
 
 - name: Add Kubernetes Repo Key
   apt_key:
