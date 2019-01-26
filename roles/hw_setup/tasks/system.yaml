@@ -57,7 +57,7 @@
   changed_when: result.stdout_lines | length
 
 - name: swap - disable swap on Raspberry Pi
-  shell: "which dphys-swapfile && dphys-swapfile swapoff && dphys-swapfile uninstall && systemctl disable dphys-swapfile"
+  shell: "which dphys-swapfile && dphys-swapfile swapoff && dphys-swapfile uninstall && systemctl disable dphys-swapfile 2>&1"
   register: result
   when: result is changed
   failed_when: result.stderr_lines | length
