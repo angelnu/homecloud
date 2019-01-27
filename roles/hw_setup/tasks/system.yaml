@@ -70,11 +70,11 @@
   register: cmline_file_check
 
 - name: Raspberry PIs - Add cgroup for Memory limits to bootparams
-  when: not cmline_file_check.stat.exists
+  when: cmline_file_check.stat.exists
   register: result
   lineinfile:
     dest: /boot/cmdline.txt
-    regexp: '^(.*?)(\s*cgroup_enable=memory\s*)?$'
+    regexp: '^((?!.*cgroup_enable=memory).*)$'
     line: '\1 cgroup_enable=memory'
     backrefs: true
     state: present
@@ -85,11 +85,11 @@
 
 
 - name: Raspberry PIs - Add cgroup for Memory limits to bootparams
-  when: not cmline_file_check.stat.exists
-  register: cgroup_memory
+  when: cmline_file_check.stat.exists
+  register: result
   lineinfile:
     dest: /boot/cmdline.txt
-    regexp: '^(.*?)(\s*cgroup_memory=1\s*)?$'
+    regexp: '^((?!.*cgroup_memory=1).*)$'
     line: '\1 cgroup_memory=1'
     backrefs: true
     state: present
