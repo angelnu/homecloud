@@ -32,6 +32,7 @@ PACKAGES:
   - nfs-common
   - attr
   - conntrack
+  - vim
 PACKAGES2REMOVE:
   - zram-config
   - sendmail-base
