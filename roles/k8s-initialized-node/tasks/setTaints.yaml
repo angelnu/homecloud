@@ -1,7 +1,7 @@
-- name: Set labels
+- name: Set taints
   shell: >
-    kubectl label nodes {{inventory_hostname}} --overwrite
-    {% for key,value in taints.items() %}
+    kubectl taint nodes {{inventory_hostname}}
+    {% for key,value in k8s_taints.items() %}
       {{ key }}=true:{{ value }} \
     {% endfor %}
   delegate_to: localhost
@@ -9,4 +9,4 @@
   register: result
   when: k8s_taints is defined
   changed_when:
-  - "'not labeled'  not in result.stdout| join('')"
+  - "'taint(s) with same effect(s)'  not in result.stdout| join('')"
