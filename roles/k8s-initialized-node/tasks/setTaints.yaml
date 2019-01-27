@@ -1,12 +1,11 @@
 - name: Set taints
-  shell: >
-    kubectl taint nodes {{inventory_hostname}}
-    {% for key,value in k8s_taints.items() %}
-      {{ key }}=true:{{ value }} \
-    {% endfor %}
+  shell: "kubectl taint nodes {{inventory_hostname}} {{ item.key }}=true:{{ item.value }}"
   delegate_to: localhost
   environment: "{{ LOCAL_KUBECTL_ENV }}"
   register: result
-  when: k8s_taints is defined
+  with_dict: "{{ k8s_taints if (k8s_taints is defined) else {} }}"
   changed_when:
-  - "'taint(s) with same effect(s)'  not in result.stdout| join('')"
+  - "'taint(s) with same effect(s)'  not in result.stderr| join('')"
+  failed_when:
+  - "'taint(s) with same effect(s)'  not in result.stderr| join('')"
+  - result.rc != 0
