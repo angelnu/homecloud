@@ -20,9 +20,20 @@ spec:
       tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master
+      - effect: NoSchedule
+        key: dedicatedARM
+        value: "true"
       nodeSelector:
         beta.kubernetes.io/arch: arm
-        HmIP: "True"
+        HomematicHW: "True"
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: dedicatedARM
+                operator: Exists
       containers:
       - name: ccu
         image: angelnu/ccu:3
@@ -46,20 +57,60 @@ spec:
         - containerPort: 22
         # web-ui
         - containerPort: 80
+        # snmp
+        - containerPort: 161
+          protocol: UDP
         # web-ui (HTTPS)
         - containerPort: 443
-        # wired Homematic
+        # uPnP/ssdp
+        - containerPort: 1900
+          protocol: UDP
+        # eq3configd
+        - containerPort: 43439
+          protocol: UDP
+
+        # ReGaHss XmlRpc
+        - containerPort: 1999
+        # ReGaHss XmlRpc Proxy
+        - containerPort: 31999
+        # ReGaHss XmlRpc TLS
+        - containerPort: 41999
+
+        # wired Homematic (HS485D XmlRpc)
         - containerPort: 2000
+        # wired Homematic (HS485D XmlRpc) Proxy
+        - containerPort: 32000
+        # wired Homematic (HS485D XmlRpc) TLS
+        - containerPort: 42000
+
         # wireless Homematic (rfd)
         - containerPort: 2001
-        # Homematic IP
-        - containerPort: 2010
-        # Rega
-        - containerPort: 8081
-        # Virtual Devices
-        - containerPort: 9292
-        # XmlRpc Server
+        # wireless Homematic (rfd) proxy
         - containerPort: 32001
+        # wireless Homematic (rfd) TLS
+        - containerPort: 42001
+
+        # crRFD Legacy XmlRpc - Homematic IP
+        - containerPort: 2010
+        # crRFD Legacy XmlRpc Proxy - Homematic IP
+        - containerPort: 32010
+        # crRFD Legacy XmlRpc TLS - Homematic IP TLS
+        - containerPort: 42010
+
+        # Rega
+        - containerPort: 8181
+        # Rega Proxy
+        - containerPort: 8183
+        # Rega TLS
+        - containerPort: 48181
+
+        # HMServer - Virtual Devices
+        - containerPort: 9292
+        # HMServer Proxy - Virtual Devices
+        - containerPort: 39292
+        # HMServer TLS - Virtual Devices
+        - containerPort: 49292
+
         # livenessProbe:
         #   tcpSocket:
         #     port: 2001
@@ -76,48 +127,102 @@ spec:
 
 ---
 # ------------------- Service ------------------- #
-
+#Need two service to mix TCP and UDP ports https://github.com/kubernetes/kubernetes/issues/23880
 kind: Service
 apiVersion: v1
 metadata:
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "true"
   labels:
     app: ccu
-  name: ccu
+  name: ccu-udp
 spec:
-  ports:
-  - name: ssh
-    port: 22
-    targetPort: 22
-  - name: http
-    port: 80
-    targetPort: 80
-  - name: https
-    port: 443
-    targetPort: 443
-  - name: hs485
-    port: 2000
-    targetPort: 2000
-  - name: rfd
-    port: 2001
-    targetPort: 2001
-  - name: hmip
-    port: 2010
-    targetPort: 2010
-  - name: rega
-    port: 8181
-    targetPort: 8181
-  - name: vdev
-    port: 9292
-    targetPort: 9292
-  - name: xmlrpc-server
-    port: 32001
-    targetPort: 32001
   #type: NodePort
   type: LoadBalancer
   loadBalancerIP: 192.168.2.232
   sessionAffinity: ClientIP
   selector:
     app: ccu
+  ports:
+  - name: snmp
+    port: 161
+    protocol: UDP
+  - name: upnp-ssdp
+    port: 1900
+    protocol: UDP
+  - name: eq3configd
+    port: 43439
+    protocol: UDP
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "true"
+  labels:
+    app: ccu
+  name: ccu
+spec:
+  #type: NodePort
+  type: LoadBalancer
+  loadBalancerIP: 192.168.2.232
+  sessionAffinity: ClientIP
+  selector:
+    app: ccu
+  ports:
+  - name: ssh
+    port: 22
+  - name: http
+    port: 80
+  - name: https
+    port: 443
+
+  - name: regahss
+    port: 1999
+  - name: regahss-proxy
+    port: 31999
+  - name: regahss-tls
+    port: 41999
+
+  - name: wired-xmlrpc
+    port: 2000
+  - name: wired-xmlrpc-proxy
+    port: 32000
+  - name: wired-xmlrpc-tls
+    port: 42000
+
+  - name: rfd
+    port: 2001
+    targetPort: 2001
+  - name: rfd-proxy
+    port: 32001
+    targetPort: 32001
+  - name: rfd-tls
+    port: 42001
+    targetPort: 42001
+
+  - name: crrfd
+    port: 2010
+  - name: crrfd-proxy
+    port: 32010
+  - name: crrfd-tls
+    port: 42010
+
+  - name: rega
+    port: 8181
+  - name: rega-proxy
+    port: 8183
+  - name: rega-tls
+    port: 48181
+
+  - name: virtual-devices
+    port: 9292
+  - name: virtual-devices-proxy
+    port: 39292
+  - name: virtual-devices-rls
+    port: 49292
 
 ---
 # ------------------- Ingress ------------------- #
