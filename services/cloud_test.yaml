@@ -6,9 +6,12 @@ metadata:
   name: cloud-automated-test
 spec:
   schedule: "0 5 * * *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 4
   concurrencyPolicy: Replace
   jobTemplate:
     spec:
+      backoffLimit: 2
       template:
         metadata:
           name: cloud-automated-test
