@@ -39,10 +39,10 @@
     repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
     state: present
 
-#- name: Update system (after refreshing caches)
-#  apt:
-#    update_cache: yes
-#    upgrade: safe
+- name: Update system (after refreshing caches)
+  apt:
+    update_cache: yes
+    upgrade: safe
 
 - name: Install Packages
   apt:
