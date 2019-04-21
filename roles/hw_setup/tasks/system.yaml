@@ -56,6 +56,25 @@
   register: result
   changed_when: result.stdout_lines | length
 
+- name: Need reboot?
+  when: result is changed
+  set_fact: need_reboot=True
+
+- name: Stop zram
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+  with_items:
+  - armbian-ramlog
+  - armbian-zram-config
+  register: result
+  failed_when: "(result is failed) and ('find' not in result.msg and 'found' not in result.msg)"
+
+- name: Need reboot?
+  when: result is changed
+  set_fact: need_reboot=True
+
 - name: swap - disable swap on Raspberry Pi
   shell: "which dphys-swapfile && dphys-swapfile swapoff && dphys-swapfile uninstall && systemctl disable dphys-swapfile 2>&1"
   register: result
