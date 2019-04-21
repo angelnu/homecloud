@@ -24,6 +24,8 @@ spec:
       - name: plex
         image: plexinc/pms-docker:plexpass
         imagePullPolicy: Always
+        securityContext:
+          privileged: true
         resources:
           requests:
             memory: "500Mi"
@@ -40,6 +42,8 @@ spec:
         - name: ALLOWED_NETWORKS
           value: 192.168.1.0/16
         volumeMounts:
+        - mountPath: /dev/dri
+          name: dri
         - mountPath: /config
           name: config
           subPath: plex/config
@@ -50,6 +54,9 @@ spec:
         # - mountPath: /music
         #   name: music
       volumes:
+      - name: dri
+        hostPath:
+          path: /dev/dri
       - name: config
         persistentVolumeClaim:
           claimName: nfs-kubernetes
