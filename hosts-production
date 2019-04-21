@@ -1,7 +1,7 @@
 [masters]
-n4.angelnu.com  name=n4.angelnu.com k8s_labels="{'masterIndex':0}"
+n4.angelnu.com  name=n4.angelnu.com k8s_labels="{'masterIndex':0, 'HomematicHW': True}"
 n5.angelnu.com  name=n5.angelnu.com k8s_labels="{'masterIndex':1}"
-n6.angelnu.com  name=n6.angelnu.com k8s_labels="{'masterIndex':2}"
+n6.angelnu.com  name=n6.angelnu.com k8s_labels="{'masterIndex':2, 'HomematicHW': True}"
 
 [workers]
 server.home.angelnu.com  name=server.home.angelnu.com k8s_labels="{'workerIndex':0}" fix_ip_address=192.168.2.3/24
