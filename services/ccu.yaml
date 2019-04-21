@@ -47,6 +47,13 @@ spec:
           limits:
             #memory: "128Mi"
             #cpu: "500m"
+        livenessProbe:
+          httpGet:
+            port: crrfd
+          initialDelaySeconds: 60 # 1 minute
+          timeoutSeconds: 5
+          periodSeconds: 60
+          failureThreshold: 5 # 5 minutes
         env:
           - name: PERSISTENT_DIR
             value: "/mnt"
@@ -91,7 +98,8 @@ spec:
         - containerPort: 42001
 
         # crRFD Legacy XmlRpc - Homematic IP
-        - containerPort: 2010
+        - name: crrfd
+          containerPort: 2010
         # crRFD Legacy XmlRpc Proxy - Homematic IP
         - containerPort: 32010
         # crRFD Legacy XmlRpc TLS - Homematic IP TLS
