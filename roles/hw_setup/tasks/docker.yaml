@@ -21,3 +21,26 @@
     path: .docker/config.json
     insertafter: "^{"
     line: '	"experimental": "enabled",'
+
+
+
+- name: Create Docker daemon settings file
+  copy:
+    dest: "/etc/docker/daemon.json "
+    content: |
+      {
+        "exec-opts": ["native.cgroupdriver=systemd"],
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "100m"
+        },
+        "storage-driver": "overlay2"
+      }
+  register: result
+
+- name: restart service docker
+  when: result is changed
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: docker
