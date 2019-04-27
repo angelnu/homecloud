@@ -1,7 +1,10 @@
 [masters]
-n3.angelnu.com name=n3.angelnu.com k8s_labels="{'masterIndex':3, 'aTest':True}"
-n1.angelnu.com name=n1.angelnu.com k8s_labels="{'masterIndex':1}"
-n2.angelnu.com name=n2.angelnu.com k8s_labels="{'masterIndex':2}"
+#n3.angelnu.com name=n3.angelnu.com k8s_labels="{'masterIndex':3, 'aTest':True}"
+#n1.angelnu.com name=n1.angelnu.com k8s_labels="{'masterIndex':1}"
+#n2.angelnu.com name=n2.angelnu.com k8s_labels="{'masterIndex':2}"
+n9.angelnu.com name=n9.angelnu.com k8s_labels="{'masterIndex':3, 'aTest':True}"
+n10.angelnu.com name=n10.angelnu.com k8s_labels="{'masterIndex':1}"
+n11.angelnu.com name=n11.angelnu.com k8s_labels="{'masterIndex':2}"
 
 [workers]
 n8.angelnu.com name=n8.angelnu.com k8s_labels="{'workerIndex':1}" k8s_taints="{'dedicatedARM':'NoSchedule'}"
@@ -11,7 +14,7 @@ masters
 workers
 
 [build]
-n1.angelnu.com name=n1.angelnu.com
+#n1.angelnu.com name=n1.angelnu.com
 
 [all:vars]
 ansible_user=root

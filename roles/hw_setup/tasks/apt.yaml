@@ -50,6 +50,12 @@
     force: yes
     state: present
 
+- name: Prevent packages with versions from being upgraded
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  with_items: "{{ PACKAGES | map('regex_search','.*=.*') | select('string') | map('regex_replace','(.*)=.*','\\1') | list }}"
+
 - name: Remove Packages
   apt:
     name: "{{ PACKAGES2REMOVE }}"
