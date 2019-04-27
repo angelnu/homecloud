@@ -1,20 +1,19 @@
 [masters]
-#n3.angelnu.com name=n3.angelnu.com k8s_labels="{'masterIndex':3, 'aTest':True}"
-#n1.angelnu.com name=n1.angelnu.com k8s_labels="{'masterIndex':1}"
-#n2.angelnu.com name=n2.angelnu.com k8s_labels="{'masterIndex':2}"
-n9.angelnu.com name=n9.angelnu.com k8s_labels="{'masterIndex':3, 'aTest':True}"
-n10.angelnu.com name=n10.angelnu.com k8s_labels="{'masterIndex':1}"
-n11.angelnu.com name=n11.angelnu.com k8s_labels="{'masterIndex':2}"
+n4.angelnu.com name=n4.angelnu.com k8s_labels="{'masterIndex':1, 'aTest':True}"
+n5.angelnu.com name=n5.angelnu.com k8s_labels="{'masterIndex':2}"
+n6.angelnu.com name=n6.angelnu.com k8s_labels="{'masterIndex':3}"
 
 [workers]
-n8.angelnu.com name=n8.angelnu.com k8s_labels="{'workerIndex':1}" k8s_taints="{'dedicatedARM':'NoSchedule'}"
+n8.angelnu.com name=n8.angelnu.com k8s_labels="{'workerIndex':1}"
+n2.angelnu.com name=n8.angelnu.com k8s_labels="{'workerIndex':2, 'dedicatedARM':True}" k8s_taints="{'dedicatedARM':'NoSchedule'}"
+n3.angelnu.com name=n8.angelnu.com k8s_labels="{'workerIndex':3}"
 
 [nodes:children]
 masters
 workers
 
 [build]
-#n1.angelnu.com name=n1.angelnu.com
+n8.angelnu.com
 
 [all:vars]
 ansible_user=root
