@@ -11,6 +11,8 @@
         certSANs:
         - {{ KUBEADM_APISERVER_HOST }}
         - {{ KUBELET_PRIMARY_MASTER_HOSTNAME }}
+        # extraArgs:
+        # - enable-admission-plugins: NodeRestriction,PodNodeSelector,PodTolerationRestriction
       controlPlaneEndpoint: "{{ KUBEADM_APISERVER_HOST }}:{{ KUBEADM_APISERVER_PORT }}"
   register: kubeadm_cfg
 
@@ -25,18 +27,18 @@
     path: "{{K8S_KUBELET_CFG_PATH}}"
   register: kubelet_st
 
-- name: Primary - Init cluster
-  shell:
-    kubeadm init --config {{ KUBEADM_CFG }}
-    creates="{{K8S_KUBELET_CFG_PATH}}"
-  when: kubelet_st.stat.exists == False
-
 - name: Primary - Set all nodes to use {{hostvars[KUBELET_PRIMARY_MASTER_HOSTNAME].ansible_default_ipv4.address}} for {{KUBEADM_APISERVER_HOST}}
   include_tasks: kubernetes_set_k8s_api.yaml
   vars:
     KUBEADM_APISERVER_IP: "{{hostvars[KUBELET_PRIMARY_MASTER_HOSTNAME].ansible_default_ipv4.address}}"
   delegate_to: "{{item}}"
   with_items: "{{ansible_play_batch}}"
+  when: kubelet_st.stat.exists == False
+
+- name: Primary - Init cluster
+  shell:
+    kubeadm init --config {{ KUBEADM_CFG }}
+    creates="{{K8S_KUBELET_CFG_PATH}}"
   when: kubelet_st.stat.exists == False
 
 - name: Primary - Deploy keepalived
