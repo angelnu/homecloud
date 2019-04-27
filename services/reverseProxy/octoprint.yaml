@@ -4,7 +4,7 @@ metadata:
   name: octoprint
 spec:
   type: ExternalName
-  externalName: 192.168.2.102
+  externalName: 192.168.2.124
   ports:
   - name: http
     protocol: TCP
