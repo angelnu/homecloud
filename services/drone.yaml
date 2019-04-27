@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drone
+spec:
+  selector:
+    matchLabels:
+      app: drone
+  replicas: 1
+  revisionHistoryLimit: 0
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: drone
+      labels:
+        app: drone
+    spec:
+      containers:
+      - name: drone
+        image: drone/drone:1
+        imagePullPolicy: Always
+        env:
+        - name: DRONE_GITEA_SERVER
+          value: https://git.angelnu.com
+        - name: DRONE_RPC_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: drone-secret
+              key: DRONE_RPC_SECRET
+        - name: DRONE_SERVER_HOST
+          value: drone.angelnu.com
+        - name: DRONE_SERVER_PROTO
+          value: https
+        - name: DRONE_GIT_ALWAYS_AUTH
+          value: "true"
+        - name: DRONE_AGENTS_ENABLED
+          value: "true"
+        ports:
+          - containerPort: 80
+          - containerPort: 443
+        volumeMounts:
+        - mountPath: /data
+          name: nfs-kubernetes
+          subPath: drone/data
+      volumes:
+        - name: nfs-kubernetes
+          persistentVolumeClaim:
+            claimName: nfs-kubernetes
+
+---
+# ------------------- DaemonSet ------------------- #
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: drone-agent
+spec:
+  template:
+    metadata:
+      name: drone-agent
+      labels:
+        app: drone-agent
+    spec:
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      - effect: NoSchedule
+        key: dedicatedARM
+        value: "true"
+      containers:
+      - name: drone
+        image: drone/agent:1
+        imagePullPolicy: Always
+        env:
+        - name: DRONE_RPC_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: drone-secret
+              key: DRONE_RPC_SECRET
+        - name: DRONE_RPC_SERVER
+          value: http://drone
+        - name: DRONE_RUNNER_CAPACITY
+          value: "2"
+        - name: DRONE_RUNNER_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        volumeMounts:
+        - name: dockersock
+          mountPath: "/var/run/docker.sock"
+      volumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: drone
+  name: drone
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  - name: tls
+    port: 443
+    targetPort: 443
+  selector:
+    app: drone
+---
+
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: drone
+spec:
+  rules:
+  - host: drone.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: drone
+          servicePort: 80

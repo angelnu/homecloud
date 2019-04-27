@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: drone-secret
+data:
+  #create with openssl rand -hex 16 | base64
+  DRONE_RPC_SECRET: M2Q2NmVlOWFjOWJiOWEzOWJhNTQ1NmI1ZDhkYTQ4NzAK #replaceMe
