@@ -12,10 +12,10 @@
   when: ansible_hostname not in kubernetes_get_nodes_result.stdout
   #we must always run this (need output bellow)
 
-- include_tasks: kubernetes_set_k8s_api.yaml
-  vars:
-    KUBEADM_APISERVER_IP: "{{hostvars[groups['masters'][0]].ansible_default_ipv4.address}}"
-  when: ansible_hostname not in kubernetes_get_nodes_result.stdout
+#- include_tasks: kubernetes_set_k8s_api.yaml
+#  vars:
+#    KUBEADM_APISERVER_IP: "{{hostvars[groups['masters'][0]].ansible_default_ipv4.address}}"
+#  when: ansible_hostname not in kubernetes_get_nodes_result.stdout
 
 - name: Join node
   shell:
