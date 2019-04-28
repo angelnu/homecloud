@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radarr
+spec:
+  selector:
+    matchLabels:
+      app: radarr
+  replicas: 1
+  revisionHistoryLimit: 0
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: radarr
+      labels:
+        app: radarr
+    spec:
+      hostname: radarr
+      nodeSelector: #Only schedule in the big server
+        kubernetes.io/hostname: server.home.angelnu.com
+      containers:
+      - name: radarr
+        image: linuxserver/radarr:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "70Mi"
+            cpu: "15m"
+          #limits:
+            #memory: "128Mi"
+            #cpu: "500m"
+        ports:
+        - containerPort: 7878
+        livenessProbe:
+          exec:
+            command:
+            - ping
+            - -c1
+            - -w15
+            - google.com
+          initialDelaySeconds: 60
+          periodSeconds: 300
+          failureThreshold: 2
+        env:
+        - name: TZ
+          value: Europe/Berlin
+        volumeMounts:
+        - mountPath: /config
+          name: config
+          subPath: radarr/config
+        - mountPath: /downloads
+          name: data
+          subPath: downloaders/transmission
+        - mountPath: /movies
+          name: data
+          subPath: 1_films
+        - mountPath: /videos
+          name: videos
+# VPN boiler-plate 1 (insert at the end of volumeMounts)
+        - name: resolv
+          mountPath: /etc/resolv_vpn.conf
+          subPath: resolv.conf
+      - name: vxlan
+        image: angelnu/openvpn-helper
+        imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        volumeMounts:
+        - name: resolv
+          mountPath: /etc_shared
+# end of VPN boiler-plate 1
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: nfs-kubernetes
+      - name: data
+        flexVolume:
+          driver: "angelnu/cifs"
+          secretRef:
+            name: "cifs-secret"
+          options:
+            source: "//nas.home.angelnu.com/downloads"
+            mountOptions: "dir_mode=0775,file_mode=0664,noperm"
+      - name: videos
+        flexVolume:
+          driver: "angelnu/cifs"
+          secretRef:
+            name: "cifs-secret"
+          options:
+            source: "//nas.home.angelnu.com/video"
+            mountOptions: "dir_mode=0775,file_mode=0664,noperm"
+# VPN boiler-plate 2 (append at the end of the volumes section)
+      - name: resolv
+        emptyDir: {}
+      initContainers:
+      - name: init-vxlan
+        image: angelnu/openvpn-helper
+        imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+        volumeMounts:
+        - name: resolv
+          mountPath: /etc_shared
+# end of VPN boiler-plate 2
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: radarr
+  name: radarr
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 7878
+  selector:
+    app: radarr
+---
+
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: radarr
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
+spec:
+  rules:
+  - host: movies.home.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: radarr
+          servicePort: http
