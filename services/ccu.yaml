@@ -6,6 +6,9 @@ metadata:
   name: ccu
 spec:
   serviceName: ccu
+  selector:
+    matchLabels:
+      app: ccu
   replicas: 1
   template:
     metadata:
