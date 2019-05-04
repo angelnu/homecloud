@@ -6,11 +6,15 @@
 #If set to true it will reset the K8S cluster on each run
 K8S_RESET: false
 
+# Kubernetes version
+K8S_VERSION: "{{ '1.14*' if production else '1.13*'}}"
+
 #kubeadm options
 KUBEADM_OPTS_INIT: #  "--ignore-preflight-errors=SystemVerification" #Ignore btrfs
 KUBEADM_APISERVER_HOST: "{{ 'k8s-api.angelnu.com' if production else 'k8s-test-api.angelnu.com' }}"
 KUBEADM_APISERVER_IP:   "{{ '192.168.2.201'       if production else '192.168.2.203'            }}"
 KUBEADM_APISERVER_PORT: 6443
+KUBEADM_NODE_PORTRANGE: 30000-32000
 KUBEADM_CFG: /etc/kubernetes/kubeadmcfg.yaml
 
 #Kubelet options
@@ -24,9 +28,9 @@ ssh:
   pub_key_path: "~/.ssh/id_rsa.pub"
 PACKAGES:
   - docker-ce=5:18.09.*
-  - kubeadm=1.13*
-  - kubelet=1.13*
-  - kubectl=1.13*
+  - kubeadm={{ K8S_VERSION }}
+  - kubelet={{ K8S_VERSION }}
+  - kubectl={{ K8S_VERSION }}
   - rsync
   - glusterfs-client
   - nfs-common
