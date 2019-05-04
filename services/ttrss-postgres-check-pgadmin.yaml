@@ -1,15 +1,13 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: ttrss-postgres-pgadmin
 spec:
+  serviceName: ttrss-postgres-pgadmin
   selector:
     matchLabels:
       app: ttrss-postgres-pgadmin
   replicas: 1
-  revisionHistoryLimit: 0
-  strategy:
-    type: Recreate
   template:
     metadata:
       name: ttrss-postgres-pgadmin

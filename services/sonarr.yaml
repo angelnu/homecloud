@@ -1,15 +1,13 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: sonarr
 spec:
+  serviceName: sonarr
   selector:
     matchLabels:
       app: sonarr
   replicas: 1
-  revisionHistoryLimit: 0
-  strategy:
-    type: Recreate
   template:
     metadata:
       name: sonarr

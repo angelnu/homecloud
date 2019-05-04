@@ -1,15 +1,13 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: plex
 spec:
+  serviceName: plex
   selector:
     matchLabels:
       app: plex
   replicas: 1
-  revisionHistoryLimit: 0
-  strategy:
-    type: Recreate
   template:
     metadata:
       name: plex

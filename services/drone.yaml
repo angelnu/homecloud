@@ -1,15 +1,13 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: drone
 spec:
+  serviceName: drone
   selector:
     matchLabels:
       app: drone
   replicas: 1
-  revisionHistoryLimit: 0
-  strategy:
-    type: Recreate
   template:
     metadata:
       name: drone

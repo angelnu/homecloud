@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   labels:
@@ -6,11 +6,7 @@ metadata:
   name: ccu
 spec:
   serviceName: ccu
-  # changing replicas value will require a manual etcdctl member remove/add
-  # command (remove before decreasing and add after increasing)
   replicas: 1
-  updateStrategy:
-    type: RollingUpdate
   template:
     metadata:
       name: ccu

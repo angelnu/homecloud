@@ -1,15 +1,13 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: jackett
 spec:
+  serviceName: jackett
   selector:
     matchLabels:
       app: jackett
   replicas: 1
-  revisionHistoryLimit: 0
-  strategy:
-    type: Recreate
   template:
     metadata:
       name: jackett
