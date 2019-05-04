@@ -11,8 +11,9 @@
         certSANs:
         - {{ KUBEADM_APISERVER_HOST }}
         - {{ KUBELET_PRIMARY_MASTER_HOSTNAME }}
-        # extraArgs:
-        # - enable-admission-plugins: NodeRestriction,PodNodeSelector,PodTolerationRestriction
+        extraArgs:
+          # enable-admission-plugins: NodeRestriction,PodNodeSelector,PodTolerationRestriction
+          service-node-port-range: "{{ KUBEADM_NODE_PORTRANGE }}"
       controlPlaneEndpoint: "{{ KUBEADM_APISERVER_HOST }}:{{ KUBEADM_APISERVER_PORT }}"
   register: kubeadm_cfg
 
