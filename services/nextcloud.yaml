@@ -35,11 +35,12 @@ spec:
         - containerPort: 80
         - containerPort: 4443 #admin console
         livenessProbe:
-          tcpSocket:
+          httpGet:
             port: 80
-          initialDelaySeconds: 1200 # 20 minutes (first init takes time)
+          initialDelaySeconds: 60 # 1 minute
           timeoutSeconds: 5
-          failureThreshold: 12 # 1 minute
+          periodSeconds: 60
+          failureThreshold: 5 # 5 minutes
         volumeMounts:
         - mountPath: /data
           name: nextcloud-data

@@ -29,6 +29,9 @@ spec:
         ports:
         - containerPort: 80
         - containerPort: 443
+        livenessProbe:
+          httpGet:
+            port: 80
         env:
         - name: TZ
           value: Europe/Berlin
@@ -66,7 +69,7 @@ kind: Ingress
 metadata:
   name: heimdall
   annotations:
-    #ingress.kubernetes.io/ssl-redirect: "true"
+    ingress.kubernetes.io/ssl-redirect: "true"
     ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
 spec:
   rules:

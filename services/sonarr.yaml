@@ -33,10 +33,8 @@ spec:
         livenessProbe:
           exec:
             command:
-            - ping
-            - -c1
-            - -w15
-            - google.com
+            - wget #no ping in this container
+            - rss.angelnu.com
           initialDelaySeconds: 60
           periodSeconds: 300
           failureThreshold: 2
@@ -48,10 +46,10 @@ spec:
           name: config
           subPath: sonarr/config
         - mountPath: /downloads
-          name: data
+          name: downloads
           subPath: downloaders/transmission
         - mountPath: /tv
-          name: data
+          name: downloads
           subPath: 1_tv
         - mountPath: /videos
           name: videos
@@ -74,22 +72,12 @@ spec:
       - name: config
         persistentVolumeClaim:
           claimName: nfs-kubernetes
-      - name: data
-        flexVolume:
-          driver: "angelnu/cifs"
-          secretRef:
-            name: "cifs-secret"
-          options:
-            source: "//nas.home.angelnu.com/downloads"
-            mountOptions: "dir_mode=0775,file_mode=0664,noperm"
+      - name: downloads
+        persistentVolumeClaim:
+          claimName: nfs-downloads
       - name: videos
-        flexVolume:
-          driver: "angelnu/cifs"
-          secretRef:
-            name: "cifs-secret"
-          options:
-            source: "//nas.home.angelnu.com/video"
-            mountOptions: "dir_mode=0775,file_mode=0664,noperm"
+        persistentVolumeClaim:
+          claimName: nfs-video
 
 # VPN boiler-plate 2 (append at the end of the volumes section)
       - name: resolv

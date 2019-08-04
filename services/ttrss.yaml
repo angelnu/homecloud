@@ -57,7 +57,7 @@ spec:
         ports:
         - containerPort: 8080
         livenessProbe:
-          tcpSocket:
+          httpGet:
             port: 8080
           initialDelaySeconds: 120 # 2 minutes
           timeoutSeconds: 10

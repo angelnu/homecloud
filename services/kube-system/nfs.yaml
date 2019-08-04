@@ -34,11 +34,13 @@ kind: PersistentVolume
 metadata:
   name: nfs-kubernetes
 spec:
-  storageClassName: nfs-kubernetes
   capacity:
     storage: 18T
   accessModes:
     - ReadWriteMany
+  mountOptions:
+    - local_lock=posix
+    - nfsvers=4.1
   nfs:
     server: nas.home.angelnu.com
     path: "/volume1/kubernetes"

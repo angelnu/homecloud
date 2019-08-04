@@ -41,7 +41,7 @@ metadata:
   name: dashboard
   namespace: kube-system
   annotations:
-    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16,10.0.0.0/8"
     ingress.kubernetes.io/auth-type: "basic"
     ingress.kubernetes.io/auth-secret: "ingress-password"
 spec:

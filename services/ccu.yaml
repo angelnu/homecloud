@@ -126,12 +126,13 @@ spec:
         #   timeoutSeconds: 10
         volumeMounts:
         - mountPath: /mnt
+        #- mountPath: /usr/local
           name: ccu-volume
       volumes:
         - name: ccu-volume
           glusterfs:
-            endpoints: glusterfs-storage
-            path: ccu2
+            endpoints: heketi-storage-endpoints
+            path: ccu
 
 ---
 # ------------------- Service ------------------- #
