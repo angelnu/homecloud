@@ -1,0 +1,62 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  labels:
+    app: glusterfs-backup
+  name: glusterfs-backup
+spec:
+  serviceName: glusterfs-backup
+  # changing replicas value will require a manual etcdctl member remove/add
+  # command (remove before decreasing and add after increasing)
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: glusterfs-backup
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: glusterfs-backup
+        image: alpine
+        imagePullPolicy: Always
+        command:
+        - "/bin/sh"
+        - "-ce"
+        - |
+          apk add --no-cache rsync
+          while [ 1 ]; do
+            date
+            if [ -f /glusterfs/stop ]; then
+              echo "Skipping syncing /glusterfs to /glusterfs-copy because /glusterfs/stop exists"
+            else
+              echo "Syncing /glusterfs to /glusterfs-copy because /glusterfs/stop does NOT exist"
+              rsync -av --delete /glusterfs/ /glusterfs-copy/
+            fi
+            echo "all was ok - sleep 10 minutes"
+            sleep 600;
+          done
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /glusterfs-copy
+          mountPropagation: Bidirectional
+          name: glusterfs-copy
+        - mountPath: /glusterfs/ccu
+          mountPropagation: Bidirectional
+          name: glusterfs-ccu
+        - mountPath: /glusterfs/iobroker
+          name: glusterfs-iobroker
+          mountPropagation: Bidirectional
+      volumes:
+      - name: glusterfs-copy
+        hostPath:
+          path: /media/glusterfs-copy
+          type: DirectoryOrCreate
+      - name: glusterfs-ccu
+        glusterfs:
+          endpoints: heketi-storage-endpoints
+          path: ccu
+      - name: glusterfs-iobroker
+        glusterfs:
+          endpoints: heketi-storage-endpoints
+          path: iobroker
