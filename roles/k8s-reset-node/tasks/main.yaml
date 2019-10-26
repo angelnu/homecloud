@@ -1,4 +1,5 @@
 - name: Reset Kubernetes installation
+  delegate_to: "{{delegate_to|default( inventory_hostname )}}"
   shell: |
     kubeadm reset -f
     #with_fileglob did not work:   https://github.com/ansible/ansible/issues/17136

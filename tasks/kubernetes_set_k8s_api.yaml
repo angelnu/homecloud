@@ -1,4 +1,5 @@
 - name: "Resolv {{ KUBEADM_APISERVER_HOST }} to {{ KUBEADM_APISERVER_IP }}"
+  delegate_to: "{{delegate_to}}"
   blockinfile:
     path: /etc/hosts
     block: |

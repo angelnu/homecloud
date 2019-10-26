@@ -20,11 +20,10 @@
 - name: Primary - Reset full cluster if {{ KUBEADM_CFG }} changed
   include_role:
     name: k8s-reset-node
-    apply:
-      delegate_to: "{{item}}"
+  vars:
+    delegate_to: "{{item}}"
   when: kubeadm_cfg is changed
   with_items: "{{ansible_play_batch}}"
-
 - name: Primary - Check Kubelet config file - {{K8S_KUBELET_CFG_PATH}}
   stat:
     path: "{{K8S_KUBELET_CFG_PATH}}"
@@ -34,7 +33,7 @@
   include_tasks: kubernetes_set_k8s_api.yaml
   vars:
     KUBEADM_APISERVER_IP: "{{hostvars[KUBELET_PRIMARY_MASTER_HOSTNAME].ansible_default_ipv4.address}}"
-  delegate_to: "{{item}}"
+    delegate_to: "{{item}}"
   with_items: "{{ansible_play_batch}}"
   when: kubelet_st.stat.exists == False
 
