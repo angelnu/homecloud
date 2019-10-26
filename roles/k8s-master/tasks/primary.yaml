@@ -18,7 +18,8 @@
   register: kubeadm_cfg
 
 - name: Primary - Reset full cluster if {{ KUBEADM_CFG }} changed
-  include_role: name=k8s-reset-node
+  include_role:
+    name: k8s-reset-node
     apply:
       delegate_to: "{{item}}"
   when: kubeadm_cfg is changed
