@@ -20,7 +20,8 @@
 - name: Primary - Reset full cluster if {{ KUBEADM_CFG }} changed
   include_role: name=k8s-reset-node
   when: kubeadm_cfg is changed
-  delegate_to: "{{item}}"
+  apply:
+    delegate_to: "{{item}}"
   with_items: "{{ansible_play_batch}}"
 
 - name: Primary - Check Kubelet config file - {{K8S_KUBELET_CFG_PATH}}
