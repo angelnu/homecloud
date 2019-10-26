@@ -15,7 +15,9 @@
 
 - name: Add Glusterfs 7 PPA (Ubuntu)
   apt_repository:
-    repo: ppa:gluster/glusterfs-5
+    #Automatic detection not working on armbian with lsb_release as shell script
+    codename: {{ ansible_distribution_release }}
+    repo: ppa:gluster/glusterfs-7
     state: present
   when: ansible_distribution == 'Ubuntu'
 
