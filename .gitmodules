@@ -43,3 +43,6 @@
 [submodule "images/apache-musicindex"]
 	path = images/apache-musicindex
 	url = git@github.com:angelnu/docker-apache-musicindex.git
+[submodule "images/i2c-relay"]
+	path = images/i2c-relay
+	url = git@github.com:angelnu/docker-i2c-Relay-Controller.git

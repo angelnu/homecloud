@@ -1,20 +1,20 @@
-# kind: Service
-# apiVersion: v1
-# metadata:
-#   name: heketi
-#   namespace: kube-system
-#   labels:
-#     glusterfs: heketi-service
-#     heketi: service
-#   annotations:
-#     description: Exposes Heketi Service
-# spec:
-#   selector:
-#     glusterfs: heketi-pod
-#   ports:
-#   - name: heketi
-#     port: 8080
-#     targetPort: 8080
+kind: Service
+apiVersion: v1
+metadata:
+  name: heketi
+  namespace: kube-system
+  labels:
+    glusterfs: heketi-service
+    heketi: service
+  annotations:
+    description: Exposes Heketi Service
+spec:
+  selector:
+    glusterfs: heketi-pod
+  ports:
+  - name: heketi
+    port: 8080
+    targetPort: 8080
 ---
 kind: Deployment
 apiVersion: extensions/v1beta1
@@ -56,8 +56,11 @@ spec:
 
         #- name: HEKETI_USER_KEY
         #  value: ${HEKETI_USER_KEY}
-        #- name: HEKETI_ADMIN_KEY
-        #  value: ${HEKETI_ADMIN_KEY}
+        - name: HEKETI_ADMIN_KEY_NO
+          valueFrom:
+            secretKeyRef:
+              name: heketi-admin-secret
+              key: HEKETI_SERVER_SECRET
         # initial topology.json in case the db does not exist
         - name: HEKETI_TOPOLOGY_FILE
           value: "/etc/heketi/topology/all.json"

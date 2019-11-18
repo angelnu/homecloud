@@ -21,6 +21,16 @@ spec:
         env:
         - name: DRONE_GITEA_SERVER
           value: https://git.angelnu.com
+        - name: DRONE_GITEA_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: drone-secret
+              key: DRONE_GITEA_CLIENT_ID
+        - name: DRONE_GITEA_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: drone-secret
+              key: DRONE_GITEA_CLIENT_SECRET
         - name: DRONE_RPC_SECRET
           valueFrom:
             secretKeyRef:
@@ -118,6 +128,8 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: drone
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
   - host: drone.angelnu.com

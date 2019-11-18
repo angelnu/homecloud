@@ -1,5 +1,5 @@
 - name: Install Kubernetes Dashboard
-  shell: kubectl apply -f https://github.com/kubernetes/dashboard/blob/v1.10.0/src/deploy/recommended/kubernetes-dashboard{{ '-arm' if 'arm' in ansible_architecture else '' }}.yaml?raw=true
+  shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/alternative.yaml
   args:
     warn: false
   environment: "{{KUBECTL_ENV}}"
@@ -10,12 +10,4 @@
   changed_when:
   - "'unchanged-list' not in result.stdout| join('')"
   - "'configured'     not in result.stdout| join('')"
-  run_once: true
-
-#TBD: this is only needed until they make the dashboard multiarch
-- name: Update dashboard image to multiarch
-  shell: "kubectl -n kube-system set image deployment kubernetes-dashboard *={{ K8S_DASHBOARD_IMAGE }}"
-  environment: "{{KUBECTL_ENV}}"
-  delegate_to: "{{ KUBELET_PRIMARY_MASTER_HOSTNAME }}"
-  changed_when: result is changed #Use the changed status from the deploy since this will always change it
   run_once: true

@@ -22,7 +22,7 @@ data:
                 "zone": 1
               },
               "devices": [
-                "/mnt/host-dev/mmcblk1p3"
+                "/mnt/host-dev/sda4"
               ]
             },
             {
@@ -38,7 +38,7 @@ data:
                 "zone": 2
               },
               "devices": [
-                "/mnt/host-dev/mmcblk1p3"
+                "/mnt/host-dev/sda4"
               ]
             },
             {
@@ -54,7 +54,7 @@ data:
                 "zone": 3
               },
               "devices": [
-                "/mnt/host-dev/mmcblk1p3"
+                "/mnt/host-dev/sda4"
               ]
             }
           ]

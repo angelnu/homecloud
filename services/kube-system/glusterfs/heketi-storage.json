@@ -129,6 +129,26 @@
       }
     },
     {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "heketi-storage-endpoints",
+        "namespace": "kube-system",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "ports": [
+          {
+            "port": 1,
+            "targetPort": 0
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
       "kind": "Job",
       "apiVersion": "batch/v1",
       "metadata": {

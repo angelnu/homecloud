@@ -19,7 +19,7 @@ spec:
         kubernetes.io/hostname: server.home.angelnu.com
       containers:
       - name: nextcloud
-        image: angelnu/nextcloudplus:latest
+        image: ownyourbits/nextcloudpi:latest
         imagePullPolicy: Always
         args:
         - nextcloud.angelnu.com

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: heketi-admin-secret
+  namespace: kube-system
+data:
+  #create with echo -n "admin" | base64
+  HEKETI_SERVER_USER: YWRtaW4=
+  #create with openssl rand -hex 16 | base64
+  HEKETI_SERVER_SECRET: NjFmN2NhYTAzNTk2ZjIyZjFmZWFjZTA3Y2ZmNDBiNjYK

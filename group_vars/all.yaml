@@ -21,7 +21,7 @@ KUBEADM_CFG: /etc/kubernetes/kubeadmcfg.yaml
 KUBELET_OPTS: " --allow-privileged=true"
 
 # Kubernetes dashboard
-K8S_DASHBOARD_IMAGE: angelnu/kubernetes-dashboard:v1.10.0
+#K8S_DASHBOARD_IMAGE: angelnu/kubernetes-dashboard:v1.10.0
 
 timezone: "Europe/Berlin"
 ssh:

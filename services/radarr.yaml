@@ -89,6 +89,9 @@ spec:
           capabilities:
             add:
               - NET_ADMIN
+        env:
+        - name: FIRST_BOOT
+          value: "true"
         volumeMounts:
         - name: resolv
           mountPath: /etc_shared

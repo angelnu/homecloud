@@ -1,0 +1,27 @@
+kind: "Service"
+apiVersion: "v1"
+metadata:
+  name: relays
+spec:
+  type: ExternalName
+  externalName: n8.angelnu.com
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: relays
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16,10.0.0.0/8"
+spec:
+  rules:
+  - host: relays.home.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: relays
+          servicePort: http

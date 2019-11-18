@@ -22,9 +22,9 @@ data:
     PROTOCOL = https
     HTTP_PORT = 443
     DOMAIN = gitea.local
-    ROOT_URL = https://gitea.angelnu.com/
+    ROOT_URL = https://git.angelnu.com/
     LANDING_PAGE = home
-    SSH_PORT = 22222
+    SSH_PORT = 2222
     REDIRECT_OTHER_PORT = true
     PORT_TO_REDIRECT = 80
 
@@ -147,11 +147,11 @@ metadata:
     name: gitea-web
 spec:
   ports:
-    - name: gitea-web
+    - name: http
       port: 80
       targetPort: 3000
   selector:
-    name: gitea
+    app: gitea
   sessionAffinity: ClientIP
 ---
 apiVersion: v1
@@ -162,11 +162,11 @@ metadata:
     name: gitea-ssh
 spec:
   ports:
-    - name: gitea-ssh
+    - name: ssh
       port: 2222
       targetPort: 22
   selector:
-    name: gitea
+    app: gitea
   type: LoadBalancer
   loadBalancerIP: 192.168.2.230
   sessionAffinity: ClientIP
@@ -178,6 +178,7 @@ kind: Ingress
 metadata:
   name: gitea
   annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
   - host: git.angelnu.com
@@ -186,7 +187,7 @@ spec:
       - path: /
         backend:
           serviceName: gitea-web
-          servicePort: 80
+          servicePort: http
       - backend:
-          serviceName: gitea-ssh
-          servicePort: 22
+          serviceName: ssh
+          servicePort: ssh

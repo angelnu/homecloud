@@ -98,6 +98,7 @@ metadata:
   name: ttrss
   annotations:
     traefik.frontend.priority: "1"
+    ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
   - host: rss.angelnu.com

@@ -15,8 +15,14 @@
 #   type: NodePort
 # status:
 #   loadBalancer: {}
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   labels:
+#     k8s-app: kubernetes-dashboard
+#   name: kubernetes-dashboard
+#   namespace: kubernetes-dashboard
 ---
-# ------------------- ClusterRoleBinding ------------------- #
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
@@ -30,7 +36,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: kubernetes-dashboard
-  namespace: kube-system
+  namespace: kubernetes-dashboard
 
 ---
 # ------------------- Ingress ------------------- #
@@ -39,11 +45,12 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: dashboard
-  namespace: kube-system
+  namespace: kubernetes-dashboard
   annotations:
     ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16,10.0.0.0/8"
     ingress.kubernetes.io/auth-type: "basic"
     ingress.kubernetes.io/auth-secret: "ingress-password"
+    ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
   - host: dashboard.angelnu.com
@@ -52,4 +59,4 @@ spec:
       - path: /
         backend:
           serviceName: kubernetes-dashboard
-          servicePort: 443
+          servicePort: 80
