@@ -21,18 +21,18 @@
   shell:
     kubeadm join
       --token {{kubernetes_token.stdout}}
-      --node-name={{item}}
+      --node-name={{inventory_hostname}}
       --discovery-token-ca-cert-hash sha256:{{kubernetes_ca_cert_hash.stdout}}
-      {{ '--experimental-control-plane' if node_admin else '' }}
+      {{ '--control-plane' if node_admin else '' }}
       {{ KUBELET_PRIMARY_MASTER_HOSTNAME }}:{{ KUBEADM_APISERVER_PORT }}
   register: result
   changed_when: result.stdout_lines | length
-  when: item not in kubernetes_get_nodes_result.stdout
+  when: inventory_hostname not in kubernetes_get_nodes_result.stdout
   # serial: 1 would be the proper solution here, but that can only be set on play level
   # upstream issue: https://github.com/ansible/ansible/issues/12170
-  run_once: true
-  with_items: "{{ansible_play_batch}}"
-  delegate_to: "{{item}}"
+  #run_once: true
+  #with_items: "{{ansible_play_batch}}"
+  #delegate_to: "{{item}}"
 
 - wait_for: port={{ KUBEADM_APISERVER_PORT }}
   when: node_admin

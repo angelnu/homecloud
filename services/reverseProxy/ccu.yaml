@@ -1,0 +1,112 @@
+kind: Service
+apiVersion: v1
+metadata:
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "true"
+  labels:
+    app: ccu
+  name: ccu
+spec:
+  #type: NodePort
+
+  #type: LoadBalancer
+  #loadBalancerIP: 192.168.2.232
+  #sessionAffinity: ClientIP
+
+  type: ExternalName
+  externalName: 192.168.2.124
+  #selector:
+  #  app: ccu
+  ports:
+  - name: ssh
+    port: 22
+  - name: http
+    port: 80
+  - name: https
+    port: 443
+
+  - name: regahss
+    port: 1999
+  - name: regahss-proxy
+    port: 31999
+  - name: regahss-tls
+    port: 41999
+
+  - name: wired-xmlrpc
+    port: 2000
+  - name: wired-xmlrpc-proxy
+    port: 32000
+  - name: wired-xmlrpc-tls
+    port: 42000
+
+  - name: rfd
+    port: 2001
+    targetPort: 2001
+  - name: rfd-proxy
+    port: 32001
+    targetPort: 32001
+  - name: rfd-tls
+    port: 42001
+    targetPort: 42001
+
+  - name: crrfd
+    port: 2010
+  - name: crrfd-proxy
+    port: 32010
+  - name: crrfd-tls
+    port: 42010
+
+  - name: rega
+    port: 8181
+  - name: rega-proxy
+    port: 8183
+  - name: rega-tls
+    port: 48181
+
+  - name: virtual-devices
+    port: 9292
+  - name: virtual-devices-proxy
+    port: 39292
+  - name: virtual-devices-rls
+    port: 49292
+
+---
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ccu
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
+    ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+  - host: homematic.home.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ccu
+          servicePort: http
+
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ccu-public
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
+    ingress.kubernetes.io/auth-type: "basic"
+    ingress.kubernetes.io/auth-secret: "ingress-password"
+spec:
+  rules:
+  - host: homematic.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ccu
+          servicePort: http

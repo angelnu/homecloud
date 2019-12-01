@@ -1,9 +1,12 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: flex-cifs
   namespace: kube-system
 spec:
+  selector:
+    matchLabels:
+      app: flex-cifs
   template:
     metadata:
       name: flex-cifs

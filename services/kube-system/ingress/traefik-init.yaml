@@ -84,7 +84,7 @@ spec:
           - containerPort: 8080
         imagePullPolicy: Always
         args:
-          #- ls
+          - ls
           - storeconfig
           - --configfile=/config/traefik.toml
           - --etcd.useAPIV3=true

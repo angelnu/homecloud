@@ -59,7 +59,7 @@ spec:
 ---
 # ------------------- Test Job ------------------- #
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   labels:
@@ -72,6 +72,9 @@ spec:
   replicas: 1
   updateStrategy:
     type: RollingUpdate
+  selector:
+    matchLabels:
+      app: cloud-manual-test
   template:
     metadata:
       name: cloud-manual-test

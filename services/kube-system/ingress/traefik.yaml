@@ -80,7 +80,7 @@ spec:
       terminationGracePeriodSeconds: 60
       hostNetwork: true
       containers:
-      - image: traefik:latest
+      - image: traefik:v1.7
         imagePullPolicy: Always
         name: traefik
         resources:

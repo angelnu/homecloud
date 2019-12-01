@@ -16,7 +16,7 @@ spec:
     spec:
       hostname: ttrss
       nodeSelector: #Only schedule in the big server
-        kubernetes.io/hostname: server.home.angelnu.com
+        kubernetes.io/hostname: server.angelnu.com
       containers:
       - name: ttrss
         image: angelnu/ttrss:latest
@@ -35,6 +35,8 @@ spec:
           value: rss.angelnu.com
         - name: TTRSS_PORT
           value: ""
+        - name: TTRSS_REPO_URL
+          value: "https://git.tt-rss.org/fox/tt-rss.git"
         - name: DB_HOST
           value: ttrss-postgres
         - name: DB_PORT
@@ -56,12 +58,12 @@ spec:
               key: password
         ports:
         - containerPort: 8080
-        livenessProbe:
-          httpGet:
-            port: 8080
-          initialDelaySeconds: 120 # 2 minutes
-          timeoutSeconds: 10
-          failureThreshold: 6 # 1 minutes
+        # livenessProbe:
+        #   httpGet:
+        #     port: 8080
+        #   initialDelaySeconds: 120 # 2 minutes
+        #   timeoutSeconds: 10
+        #   failureThreshold: 6 # 1 minutes
       initContainers:
       - image: postgres:alpine
         name: waitforpostgres

@@ -16,7 +16,7 @@ spec:
     spec:
       hostname: sonarr
       nodeSelector: #Only schedule in the big server
-        kubernetes.io/hostname: server.home.angelnu.com
+        kubernetes.io/hostname: server.angelnu.com
       containers:
       - name: sonarr
         image: linuxserver/sonarr:latest

@@ -4,18 +4,18 @@ n5.angelnu.com name=n5.angelnu.com k8s_labels="{'masterIndex':2}"
 n6.angelnu.com name=n6.angelnu.com k8s_labels="{'masterIndex':3}"
 
 [workers]
-n8.angelnu.com name=n8.angelnu.com k8s_labels="{'workerIndex':1}"
-#n1.angelnu.com name=n1.angelnu.com k8s_labels="{'workerIndex':2}"
+#n12.angelnu.com name=n8.angelnu.com k8s_labels="{'workerIndex':1}"
+n1.angelnu.com name=n1.angelnu.com k8s_labels="{'workerIndex':2}"
 n2.angelnu.com name=n8.angelnu.com k8s_labels="{'workerIndex':3, 'dedicatedARM':True}" k8s_taints="{'dedicatedARM':'NoSchedule'}"
-#n3.angelnu.com name=n3.angelnu.com k8s_labels="{'workerIndex':4}"
 
 [nodes:children]
 masters
 workers
 
 [build]
-n8.angelnu.com
+#n12.angelnu.com
 
 [all:vars]
 ansible_user=root
 production=False
+ansible_python_interpreter=/usr/bin/python3

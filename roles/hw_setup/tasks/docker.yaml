@@ -14,7 +14,9 @@
   copy:
     dest: ".docker/config.json"
     content: |
-      {}
+      {
+       "foo":"foo"
+      }
 
 - name: "Enable Docker experimental cli (docker manifest)"
   lineinfile:

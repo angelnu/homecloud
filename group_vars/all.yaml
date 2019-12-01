@@ -7,7 +7,7 @@
 K8S_RESET: false
 
 # Kubernetes version
-K8S_VERSION: "{{ '1.14*' if production else '1.13*'}}"
+K8S_VERSION: "{{ '1.16*' if production else '1.16*'}}"
 
 #kubeadm options
 KUBEADM_OPTS_INIT: #  "--ignore-preflight-errors=SystemVerification" #Ignore btrfs
@@ -18,7 +18,7 @@ KUBEADM_NODE_PORTRANGE: 30000-32000
 KUBEADM_CFG: /etc/kubernetes/kubeadmcfg.yaml
 
 #Kubelet options
-KUBELET_OPTS: " --allow-privileged=true"
+KUBELET_OPTS: ""
 
 # Kubernetes dashboard
 #K8S_DASHBOARD_IMAGE: angelnu/kubernetes-dashboard:v1.10.0
@@ -26,6 +26,9 @@ KUBELET_OPTS: " --allow-privileged=true"
 timezone: "Europe/Berlin"
 ssh:
   pub_key_path: "~/.ssh/id_rsa.pub"
+BOOTSTRAP_PACKAGES:
+  - apt-transport-https
+  - aptitude
 PACKAGES:
   - docker-ce=5:18.09.*
   - kubeadm={{ K8S_VERSION }}
@@ -37,6 +40,7 @@ PACKAGES:
   - attr
   - conntrack
   - vim
+  - git
 PACKAGES2REMOVE:
   - zram-config
   - sendmail-base
