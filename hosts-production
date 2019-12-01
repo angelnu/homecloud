@@ -1,11 +1,11 @@
 [masters]
-n9.angelnu.com    name=n9.angelnu.com k8s_labels="{'masterIndex':0, 'HomematicHW': True}"
+n9.angelnu.com    name=n9.angelnu.com k8s_labels="{'masterIndex':0}"
 n10.angelnu.com  name=n10.angelnu.com k8s_labels="{'masterIndex':1}"
-n11.angelnu.com  name=n11.angelnu.com k8s_labels="{'masterIndex':2, 'HomematicHW': True}"
+n11.angelnu.com  name=n11.angelnu.com k8s_labels="{'masterIndex':2}"
 
 [workers]
 server.angelnu.com  name=server.angelnu.com k8s_labels="{'workerIndex':0}" fix_ip_address=192.168.2.3/24
-#n7.angelnu.com      name=n7.angelnu.com     k8s_labels="{'workerIndex':1, 'dedicatedARM':True, 'HomematicHW': True}" k8s_taints="{'dedicatedARM':'NoSchedule'}"
+n7.angelnu.com      name=n7.angelnu.com     k8s_labels="{'workerIndex':1, 'dedicatedARM':True, 'HomematicHW': True}" k8s_taints="{'dedicatedARM':'NoSchedule'}"
 
 [nodes:children]
 masters

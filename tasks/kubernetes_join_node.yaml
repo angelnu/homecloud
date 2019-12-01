@@ -9,7 +9,7 @@
 
 - name: Get Kubernetes token
   include_tasks: kubernetes_get_token.yaml
-  when: ansible_hostname not in kubernetes_get_nodes_result.stdout
+  when: inventory_hostname not in kubernetes_get_nodes_result.stdout
   #we must always run this (need output bellow)
 
 #- include_tasks: kubernetes_set_k8s_api.yaml
