@@ -11,16 +11,21 @@
 
 - name: Add docker Repo
   apt_repository:
-    repo: deb https://download.docker.com/linux/{{ansible_distribution|lower}} {{ ansible_distribution_release }} stable
+    repo: "deb https://download.docker.com/linux/{{ansible_distribution|lower}} {{ ansible_distribution_release }} stable"
     state: present
 
 - name: 'import Glusterfs signing key'
   apt_key:
-    url: http://download.gluster.org/pub/gluster/glusterfs/5/rsa.pub
+    url: http://download.gluster.org/pub/gluster/glusterfs/7/rsa.pub
 
-- name: Add Glusterfs 5 PPA (Ubuntu)
+- name: Add Glusterfs 7 PPA (Ubuntu)
   apt_repository:
-    repo: "deb http://ppa.launchpad.net/gluster/glusterfs-5/ubuntu focal main"
+    # Glusterfs 5 PPA (Ubuntu)
+    #repo: "deb http://ppa.launchpad.net/gluster/glusterfs-5/ubuntu focal main"
+
+    #Automatic detection not working on armbian with lsb_release as shell script
+    codename: "{{ ansible_distribution_release }}"
+    repo: ppa:gluster/glusterfs-7
     state: present
     update_cache: no
   when: ansible_distribution == 'Ubuntu'

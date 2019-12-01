@@ -30,7 +30,6 @@
           delegate_to: "{{item}}"
   when: kubeadm_cfg is changed
   with_items: "{{ansible_play_batch}}"
-
 - name: Primary - Check Kubelet config file - {{K8S_KUBELET_CFG_PATH}}
   stat:
     path: "{{K8S_KUBELET_CFG_PATH}}"
