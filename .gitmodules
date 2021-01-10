@@ -46,3 +46,12 @@
 [submodule "images/i2c-relay"]
 	path = images/i2c-relay
 	url = git@github.com:angelnu/docker-i2c-Relay-Controller.git
+[submodule "images/postgres-reset-password"]
+	path = images/postgres-reset-password
+	url = git@github.com:angelnu/docker-postgres-reset-password.git
+[submodule "homecloud/charts"]
+	path = homecloud/charts
+	url = git@github.com:angelnu/helm.git
+[submodule "homecloud/charts/gitea-wrapper/charts/gitea"]
+	path = helm/charts/gitea-wrapper/charts/gitea
+	url = https://github.com/jfelten/gitea-helm-chart.git

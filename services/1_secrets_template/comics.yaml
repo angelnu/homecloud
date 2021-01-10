@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: comic-secrets
+type: Opaque
+stringData:
+  RSS_URL: "https://example.com/api/"
+  RSS_LOGIN: "user"
+  RSS_PASSWORD: "password"
+  XML_FOLDER: "/feeds/"
+  RSS_SCRAPPER_URL: "https://example.com/scrapping"

@@ -1,3 +1,22 @@
+# ------------------- Ingress ------------------- #
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: heketi
+  namespace: kube-system
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
+spec:
+  rules:
+  - host: heketi-api.k8s.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: heketi
+          servicePort: heketi
+---
 kind: Service
 apiVersion: v1
 metadata:
@@ -28,6 +47,8 @@ metadata:
     description: Defines how to deploy Heketi
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       glusterfs: heketi-pod
@@ -40,6 +61,8 @@ spec:
         heketi: pod
     spec:
       serviceAccountName: heketi-service-account
+      nodeSelector:
+        kubernetes.io/arch: amd64
       containers:
       - image: heketi/heketi:dev
         imagePullPolicy: Always
@@ -55,16 +78,30 @@ spec:
           value: "y"
         - name: HEKETI_IGNORE_STALE_OPERATIONS
           value: "true"
-        #- name: HEKETI_GLUSTERAPP_LOGLEVEL
-        #  value: "debug"
+        - name: HEKETI_GLUSTERAPP_LOGLEVEL
+          value: "debug"
 
-        #- name: HEKETI_USER_KEY
-        #  value: ${HEKETI_USER_KEY}
-        - name: HEKETI_ADMIN_KEY_NO
+        - name: HEKETI_CLI_USER
           valueFrom:
             secretKeyRef:
               name: heketi-admin-secret
-              key: HEKETI_SERVER_SECRET
+              key: user
+        - name: HEKETI_CLI_KEY
+          valueFrom:
+            secretKeyRef:
+              name: heketi-admin-secret
+              key: key
+
+        - name: HEKETI_USER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: heketi-admin-secret
+              key: key
+        - name: HEKETI_ADMIN_KEY
+          valueFrom:
+            secretKeyRef:
+              name: heketi-admin-secret
+              key: key
         # initial topology.json in case the db does not exist
         - name: HEKETI_TOPOLOGY_FILE
           value: "/etc/heketi/topology/all.json"
@@ -96,7 +133,7 @@ spec:
         configMap:
           name: heketi-config-secret
       #Initial setup:
-      # 0- dissable gluster for DB volume (so it starts)
+      # 0- disable gluster for DB volume (so it starts)
       # 1- go into container
       # 2- heketi-cli topology load --json=/etc/heketi/topology/all.json
       # 3- heketi-cli setup-openshift-heketi-storage

@@ -1,0 +1,5 @@
+- name: Reset microk8s
+  hosts: all
+  gather_facts: false
+  tasks:
+  - import_role: name=microk8s-reset

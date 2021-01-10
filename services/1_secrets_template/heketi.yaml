@@ -3,6 +3,7 @@ kind: Secret
 metadata:
   name: heketi-admin-secret
   namespace: kube-system
+type: kubernetes.io/glusterfs
 data:
   #create with echo -n "admin" | base64
   HEKETI_SERVER_USER: YWRtaW4=

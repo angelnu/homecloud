@@ -1,0 +1,124 @@
+apiVersion: v2
+name: homecloud
+description: Home cluster
+
+# A chart can be either an 'application' or a 'library' chart.
+#
+# Application charts are a collection of templates that can be packaged into versioned archives
+# to be deployed.
+#
+# Library charts provide useful utilities or functions for the chart developer. They're included as
+# a dependency of application charts to inject those utilities and functions into the rendering
+# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+version: 0.1.0
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application.
+appVersion: 0.0.1
+
+dependencies:
+- name: clusterfs
+  version: ">=0.1.0"
+  condition: clusterfs.enabled,all.enabled
+
+- name: login
+  version: ">=0.1.0"
+  condition: login.enabled,all.enabled
+
+#- name: openebs
+#  version: "~1"
+#  repository: https://kubernetes-charts.storage.googleapis.com
+#  condition: openebs.enabled,all.enabled
+
+- name: postgres
+  version: ">=0.1.0"
+  #repository: "file://../postgres"
+  condition: postgres.enabled,all.enabled
+
+- name: cockroach
+  version: ">=0.1.0"
+  condition: cockroach.enabled,all.enabled
+
+- name: db
+  version: ">=0.1.0"
+  condition: db-crd.enabled,all.enabled
+  alias: db-crd
+
+- name: db
+  version: ">=0.1.0"
+  condition: db-example.enabled,all.enabled
+  alias: db-example
+
+- name: postgresop
+  version: ">=0.1.0"
+  condition: postgresop-crd.enabled,all.enabled
+  alias: postgresop-crd
+
+- name: postgresop
+  version: ">=0.1.0"
+  condition: postgresop.enabled,all.enabled
+  alias: postgresop
+
+- name: ttrss
+  version: ">=0.1.0"
+  condition: ttrss.enabled,all.enabled
+
+- name: home-assistant-wrapper
+  version: ">=0.1.0"
+  condition: home-assistant-wrapper.enabled,all.enabled
+
+- name: nextcloud-bundle
+  version: ">=0.1.0"
+  condition: nextcloud-bundle.enabled,all.enabled
+
+- name: metallb
+  version: ">=2.0.0"
+  repository: https://charts.bitnami.com/bitnami
+  condition: metallb.enabled,all.enabled
+
+- name: ingress-nginx
+  version: ">=3.0.0"
+  repository: https://kubernetes.github.io/ingress-nginx
+  condition: ingress-nginx.enabled,all.enabled
+
+- name: cert-manager
+  version: "~1.1"
+  repository: https://charts.jetstack.io
+  condition: cert-manager.enabled,all.enabled
+
+- name: cert-manager-dnsmadeeasy
+  version: ">=0.1.0"
+  condition: cert-manager-dnsmadeeasy.enabled,all.enabled
+
+- name: certs
+  version: ">=0.1.0"
+  condition: certs.enabled,all.enabled
+
+- name: keel
+  version: ">=0.8.18"
+  repository: https://charts.keel.sh
+  condition: keel.enabled,all.enabled
+
+- name: iobroker
+  version: ">=0.1.0"
+  condition: iobroker.enabled,all.enabled
+
+- name: esphome
+  version: ">=0.1.0"
+  condition: esphome.enabled,all.enabled
+
+- name: reverse-proxy
+  version: ">=0.1.0"
+  condition: reverse-proxy.enabled,all.enabled
+
+- name: heimdall
+  version: ">=0.1.0"
+  condition: heimdall.enabled,all.enabled
+
+- name: gitea-wrapper
+  version: ">=0.1.0"
+  condition: gitea-wrapper.enabled,all.enabled

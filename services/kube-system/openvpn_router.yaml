@@ -43,6 +43,7 @@ spec:
           capabilities:
             add:
               - NET_ADMIN
+              - MKNOD
         env:
         - name: DNS
           value: "true"
@@ -62,6 +63,19 @@ spec:
 
       #Configure as router
       initContainers:
+      - name: copy-config
+        #image: armhf/alpine:latest
+        image: alpine
+        command:
+        - /bin/sh
+        - -c
+        - "cp -aLv /vpn-ro/* /vpn/; ls -l /vpn/"
+        volumeMounts:
+          - mountPath: "/vpn-ro"
+            name: "config-ro"
+          - mountPath: "/vpn"
+            name: "config"
+
       - name: vxlan
         #image: armhf/alpine:latest
         image: angelnu/openvpn-helper
@@ -74,10 +88,11 @@ spec:
         - /usr/local/bin/router.sh
 
       volumes:
-      - name: config
+      - name: config-ro
         configMap:
           name: openvpn
-          defaultMode: 0600
+      - name: config
+        emptyDir: {}
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

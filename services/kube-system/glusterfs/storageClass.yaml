@@ -1,0 +1,30 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gluster
+provisioner: kubernetes.io/glusterfs
+parameters:
+  #endpoint: "heketi-storage-endpoints"
+  resturl: "http://heketi-api.k8s.angelnu.com"
+  restuser: "admin"
+  secretNamespace: "kube-system"
+  secretName: "heketi-admin-secret"
+  #gidMin: "40000"
+  #gidMax: "50000"
+  volumetype: "replicate:3"
+  customepnameprefix: "persistent"
+  volumenameprefix: "persistent"
+  volumeoptions: "user.heketi.zone-checking strict"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gluster-ldap
+  namespace: kube-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gluster
+  resources:
+    requests:
+      storage: 100Mi

@@ -1,5 +1,5 @@
 - name: Wait for node to be ready
-  shell: "kubectl get nodes -o json {{inventory_hostname}}"
+  shell: "{{ KUBECTL_BIN }} get nodes -o json {{inventory_hostname}}"
   environment: "{{KUBECTL_ENV}}"
   delegate_to: "{{KUBELET_PRIMARY_MASTER_HOSTNAME}}"
   register: result

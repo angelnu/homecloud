@@ -132,8 +132,13 @@ kind: Ingress
 metadata:
   name: drone
   annotations:
-    ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/auth-url: "https://ingress-auth.angelnu.com/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://ingress-auth.angelnu.com/start?rd=$scheme://$host$request_uri"
 spec:
+  tls:
+  - hosts:
+    - drone.angelnu.com
+    secretName: prod-wildcard-angelnu-com-tls
   rules:
   - host: drone.angelnu.com
     http:

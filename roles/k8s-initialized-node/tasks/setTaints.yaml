@@ -1,5 +1,5 @@
 - name: Set taints
-  shell: "kubectl taint nodes {{inventory_hostname}} {{ item.key }}=true:{{ item.value }}"
+  shell: "{{ KUBECTL_BIN }} taint nodes {{inventory_hostname}} {{ item.key }}={{ item.value }}"
   delegate_to: localhost
   environment: "{{ LOCAL_KUBECTL_ENV }}"
   register: result

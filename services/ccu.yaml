@@ -1,0 +1,255 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: ccu
+  labels:
+    app.kubernetes.io/name: ccu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ccu
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ccu
+    spec:
+      hostname: ccu
+      nodeSelector:
+      #  beta.kubernetes.io/arch: arm
+        HomematicHW: "True"
+      containers:
+      - name: ccu
+        image: ghcr.io/angelnu/raspberrymatic:snapshot
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+        resources:
+          requests:
+            memory: "130Mi"
+            cpu: "100m"
+          limits:
+            #memory: "128Mi"
+            #cpu: "500m"
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - |
+              for port in 2001 2010; do
+                echo -n Testing $port
+                if nc -z localhost $port; then
+                  echo -OK
+                else
+                  echo -FAIL
+                fi
+              done
+          initialDelaySeconds: 60 # 1 minute
+          timeoutSeconds: 5
+          periodSeconds: 60
+          failureThreshold: 5 # 5 minutes
+        ports:
+        ##ssh
+        - containerPort: 22
+        # web-ui
+        - containerPort: 80
+        # snmp
+        - containerPort: 161
+          protocol: UDP
+        # web-ui (HTTPS)
+        - containerPort: 443
+        # uPnP/ssdp
+        - containerPort: 1900
+          protocol: UDP
+        # eq3configd
+        - containerPort: 43439
+          protocol: UDP
+
+        # ReGaHss XmlRpc
+        - containerPort: 1999
+        # ReGaHss XmlRpc Proxy
+        - containerPort: 31999
+        # ReGaHss XmlRpc TLS
+        - containerPort: 41999
+
+        # wired Homematic (HS485D XmlRpc)
+        - containerPort: 2000
+        # wired Homematic (HS485D XmlRpc) Proxy
+        - containerPort: 32000
+        # wired Homematic (HS485D XmlRpc) TLS
+        - containerPort: 42000
+
+        # wireless Homematic (rfd)
+        - containerPort: 2001
+        # wireless Homematic (rfd) proxy
+        - containerPort: 32001
+        # wireless Homematic (rfd) TLS
+        - containerPort: 42001
+
+        # crRFD Legacy XmlRpc - Homematic IP
+        - name: crrfd
+          containerPort: 2010
+        # crRFD Legacy XmlRpc Proxy - Homematic IP
+        - containerPort: 32010
+        # crRFD Legacy XmlRpc TLS - Homematic IP TLS
+        - containerPort: 42010
+
+        # Rega
+        - containerPort: 8181
+        # Rega Proxy
+        - containerPort: 8183
+        # Rega TLS
+        - containerPort: 48181
+
+        # HMServer - Virtual Devices
+        - containerPort: 9292
+        # HMServer Proxy - Virtual Devices
+        - containerPort: 39292
+        # HMServer TLS - Virtual Devices
+        - containerPort: 49292
+
+        # livenessProbe:
+        #   tcpSocket:
+        #     port: 2001
+        #   initialDelaySeconds: 600
+        #   timeoutSeconds: 10
+        volumeMounts:
+        - mountPath: /usr/local
+          subPath: ccu
+        #- mountPath: /usr/local
+          name: ccu-volume
+        - mountPath: /sys
+          name: sys
+      volumes:
+        - name: ccu-volume
+          persistentVolumeClaim:
+            claimName: nfs-kubernetes
+        - name: sys
+          hostPath:
+            path: /sys
+            type: Directory
+
+---
+# ------------------- Service ------------------- #
+#Need two service to mix TCP and UDP ports https://github.com/kubernetes/kubernetes/issues/23880
+kind: Service
+apiVersion: v1
+metadata:
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "true"
+  labels:
+    app.kubernetes.io/name: ccu
+  name: ccu-udp
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.129
+  sessionAffinity: ClientIP
+  selector:
+    app.kubernetes.io/name: ccu
+  ports:
+  - name: snmp
+    port: 161
+    protocol: UDP
+  - name: upnp-ssdp
+    port: 1900
+    protocol: UDP
+  - name: eq3configd
+    port: 43439
+    protocol: UDP
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "true"
+  labels:
+    app.kubernetes.io/name: ccu
+  name: ccu
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.129
+  sessionAffinity: ClientIP
+  selector:
+    app.kubernetes.io/name: ccu
+  ports:
+  - name: ssh
+    port: 22
+  - name: http
+    port: 80
+  - name: https
+    port: 443
+
+  - name: regahss
+    port: 1999
+  - name: regahss-proxy
+    port: 31999
+  - name: regahss-tls
+    port: 41999
+
+  - name: wired-xmlrpc
+    port: 2000
+  - name: wired-xmlrpc-proxy
+    port: 32000
+  - name: wired-xmlrpc-tls
+    port: 42000
+
+  - name: rfd
+    port: 2001
+    targetPort: 2001
+  - name: rfd-proxy
+    port: 32001
+    targetPort: 32001
+  - name: rfd-tls
+    port: 42001
+    targetPort: 42001
+
+  - name: crrfd
+    port: 2010
+  - name: crrfd-proxy
+    port: 32010
+  - name: crrfd-tls
+    port: 42010
+
+  - name: rega
+    port: 8181
+  - name: rega-proxy
+    port: 8183
+  - name: rega-tls
+    port: 48181
+
+  - name: virtual-devices
+    port: 9292
+  - name: virtual-devices-proxy
+    port: 39292
+  - name: virtual-devices-rls
+    port: 49292
+
+---
+# ------------------- Ingress ------------------- #
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ccu
+  annotations:
+    ingress.kubernetes.io/whitelist-source-range: "192.168.2.0/16"
+    #ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - ccu.home.angelnu.com
+    secretName: prod-wildcard-angelnu-com-tls
+  rules:
+  - host: ccu.home.angelnu.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ccu
+            port:
+              number: 80

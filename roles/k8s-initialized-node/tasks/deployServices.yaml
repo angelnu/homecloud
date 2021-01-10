@@ -1,5 +1,5 @@
 - name: Load all services to cluster
-  shell: "kubectl apply -R -f  services"
+  shell: "{{ KUBECTL_BIN }} apply -R -f  services"
   delegate_to: localhost
   environment: "{{ LOCAL_KUBECTL_ENV }}"
   register: result
@@ -8,4 +8,7 @@
   changed_when:
   - "'unchanged'  not in result.stdout| join('')"
   - "'configured' not in result.stdout| join('')"
+  until: result is succeeded
+  retries: 2 #To account for Custom Resource Definitions
+  delay: 5
   run_once: True

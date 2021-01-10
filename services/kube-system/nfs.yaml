@@ -25,6 +25,64 @@ spec:
   resources:
     requests:
       storage: 10T
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-kubernetes-test
+  namespace: test
+spec:
+  storageClassName: nfs-kubernetes-test
+  capacity:
+    storage: 18T
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: nas.home.angelnu.com
+    path: "/volume1/kubernetes"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-kubernetes
+  namespace: test
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: "nfs-kubernetes-test"
+  resources:
+    requests:
+      storage: 10T
+
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-software
+spec:
+  capacity:
+    storage: 18T
+  accessModes:
+    - ReadWriteMany
+  mountOptions:
+    - local_lock=posix
+    - nfsvers=4.1
+  nfs:
+    server: nas.home.angelnu.com
+    path: "/volume1/software"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-software
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 1T
 
 
 

@@ -17,6 +17,8 @@ spec:
       labels:
         app: heketi-ui
     spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
       containers:
       - name: heketi-ui
         image: orachide/heketi-ui
@@ -28,12 +30,12 @@ spec:
           valueFrom:
             secretKeyRef:
               name: heketi-admin-secret
-              key: HEKETI_SERVER_USER
+              key: user
         - name: HEKETI_SERVER_SECRET
           valueFrom:
             secretKeyRef:
               name: heketi-admin-secret
-              key: HEKETI_SERVER_SECRET
+              key: key
         resources:
           requests:
             memory: "50Mi"

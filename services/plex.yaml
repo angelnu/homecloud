@@ -13,8 +13,14 @@ spec:
       name: plex
       labels:
         app: plex
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |
+          [{
+            "name":"macvlan-static",
+            "ips": ["192.168.1.2"]
+          }]
     spec:
-      hostNetwork: true
+      #hostNetwork: true
       hostname: plex
       nodeSelector:
         beta.kubernetes.io/arch: amd64
@@ -34,6 +40,19 @@ spec:
 
         ports:
         - containerPort: 32400
+        - containerPort: 3005
+        - containerPort: 8324
+        - containerPort: 32469
+        - containerPort: 1900
+          protocol: UDP
+        - containerPort: 32410
+          protocol: UDP
+        - containerPort: 32412
+          protocol: UDP
+        - containerPort: 32413
+          protocol: UDP
+        - containerPort: 32414
+          protocol: UDP
         env:
         - name: TZ
           value: Europe/Berlin
@@ -92,6 +111,8 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "true"
   labels:
     app: plex
   name: plex
@@ -100,8 +121,62 @@ spec:
   - name: http
     port: 32400
     targetPort: 32400
+    protocol: TCP
+  - name: tbd1
+    port: 3005
+    targetPort: 3005
+    protocol: TCP
+  - name: tbd2
+    port: 8324
+    targetPort: 8324
+    protocol: TCP
+  - name: tbd3
+    port: 32469
+    targetPort: 32469
+    protocol: TCP
   selector:
     app: plex
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.133
+  sessionAffinity: ClientIP
+---
+# -------------------- Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "true"
+  labels:
+    app: plex-udp
+  name: plex-udp
+spec:
+  ports:
+  - name: tbd4
+    port: 1900
+    targetPort: 1900
+    protocol: UDP
+  - name: tbd5
+    port: 32410
+    targetPort: 32410
+    protocol: UDP
+  - name: tbd6
+    port: 32412
+    targetPort: 32412
+    protocol: UDP
+  - name: tbd7
+    port: 32413
+    targetPort: 32413
+    protocol: UDP
+  - name: tbd8
+    port: 32414
+    targetPort: 32414
+    protocol: UDP
+  selector:
+    app: plex
+  type: LoadBalancer
+  loadBalancerIP: 192.168.1.133
+  sessionAffinity: ClientIP
 ---
 
 # ------------------- Ingress ------------------- #
@@ -111,6 +186,10 @@ kind: Ingress
 metadata:
   name: plex
 spec:
+  tls:
+  - hosts:
+    - plex.angelnu.com
+    secretName: prod-wildcard-angelnu-com-tls
   rules:
   - host: plex.angelnu.com
     http:

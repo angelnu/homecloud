@@ -3,7 +3,7 @@
 
 - name: Reset cluster if {{ KUBEADM_CFG }} changed
   shell:
-    kubeadm reset -f
+    kubeadm reset -f --cri-socket={{ KUBEADM_CRI_SOCKET }}
   #we cannot reset here for master or we will loose certs
   when: not node_admin and inventory_hostname not in kubernetes_get_nodes_result.stdout
 
@@ -23,6 +23,7 @@
       --token {{kubernetes_token.stdout}}
       --node-name={{inventory_hostname}}
       --discovery-token-ca-cert-hash sha256:{{kubernetes_ca_cert_hash.stdout}}
+      --cri-socket={{ KUBEADM_CRI_SOCKET }}
       {{ '--control-plane' if node_admin else '' }}
       {{ KUBELET_PRIMARY_MASTER_HOSTNAME }}:{{ KUBEADM_APISERVER_PORT }}
   register: result

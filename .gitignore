@@ -3,3 +3,9 @@ kubeconfig
 kubeconfig-test
 services/secrets
 .remote-sync.json
+.DS_Store
+services_temp_dissabled/drone.yaml
+services_temp_dissabled/jackett.yaml
+services_temp_dissabled/radarr.yaml
+services_temp_dissabled/sonarr.yaml
+services_temp_dissabled/transmission.yaml

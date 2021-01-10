@@ -1,5 +1,5 @@
 - name: Set labels
-  shell: "kubectl label nodes {{inventory_hostname}} --overwrite {{ item.key }}={{ item.value }}"
+  shell: "{{ KUBECTL_BIN }} label nodes {{inventory_hostname}} --overwrite {{ item.key }}={{ item.value }}"
   delegate_to: localhost
   environment: "{{ LOCAL_KUBECTL_ENV }}"
   register: result

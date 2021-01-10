@@ -1,9 +1,0 @@
-# ------------------- Secret ------------------- #
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ttrss-pgadmin-secret
-data:
-  # create with echo -n "admin" | base64
-  default-email: dXNlckBkb21haW4uY29t #user@domain.com
-  default-password: cmVwbGFjZU1l #replaceMe

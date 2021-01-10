@@ -6,15 +6,51 @@
 #If set to true it will reset the K8S cluster on each run
 K8S_RESET: false
 
+# microk8s
+MICROK8S_BIN: /snap/bin/microk8s
+KUBECTL_BIN: /snap/bin/microk8s kubectl
+DOCKER_USER: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          39353438346635386437643834303766353339336230623766666333626562323231613538656162
+          3464666163346534396430363334353332666538393666650a646261633130616532396432363766
+          36326135643430373137623161623034636261373337353264376666306337363838633463633631
+          6439326236313533370a386365313733303434333336306431623662373136346532386232376163
+          3133
+DOCKER_PASSWORD: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          31363537636635666164343266306333643939616438636230313366316664653130616336366333
+          3134613336663633343830313539373432613662613437340a306438373664393962623835366236
+          31353065303634303262393366616536376336663964393566636661353164313261396634356634
+          3337356332393566360a393661346432333539633830353432626263643531386165646134383330
+          6463
+# example.com
+MICROK8S_DOMAIN: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          61343737376634383366643238383335373363346263363432316166333839323838633638613763
+          3137636135663966363163353430346538363064376237370a366535663061626464666432656165
+          34376238653836363165313765383838656164383034663636306539386261386466306539656230
+          3737646430303365350a326137376333373235323761343065373230343039373963666335316636
+          6533
+MICROK8S_ADDONS:
+- dns
+#- metallb:192.168.1.128-192.168.1.191
+- multus
+- helm3
+- metrics-server
+
 # Kubernetes version
-K8S_VERSION: "{{ '1.16*' if production else '1.16*'}}"
+K8S_VERSION: "{{ '1.17*' if production else '1.17*'}}"
 
 #kubeadm options
 KUBEADM_OPTS_INIT: #  "--ignore-preflight-errors=SystemVerification" #Ignore btrfs
-KUBEADM_APISERVER_HOST: "{{ 'k8s-api.angelnu.com' if production else 'k8s-test-api.angelnu.com' }}"
+KUBEADM_APISERVER_HOST: "{{ 'k8s-api.'+MICROK8S_DOMAIN if production else 'k8s-test-api.'+MICROK8S_DOMAIN }}"
 KUBEADM_APISERVER_IP:   "{{ '192.168.2.201'       if production else '192.168.2.203'            }}"
 KUBEADM_APISERVER_PORT: 6443
 KUBEADM_NODE_PORTRANGE: 30000-32000
+KUBEADM_OIDC_ISSUER_URL: "{{ 'https://oidc.' + MICROK8S_DOMAIN }}"
+KUBEADM_CRI_SOCKET: "{{ '/var/run/crio/crio.sock' if uses_crio else '/run/containerd/containerd.sock'            }}"
+KUBEADM_OIDC_CLIENT_ID: ingress
+
 KUBEADM_CFG: /etc/kubernetes/kubeadmcfg.yaml
 
 #Kubelet options
@@ -41,12 +77,34 @@ PACKAGES:
   - conntrack
   - vim
   - git
+  - ansible #For ansible-vault
 PACKAGES2REMOVE:
   - zram-config
   - sendmail-base
   - libnss-mdns #It uses multicast dns to resol .local -> conflicts with k8s dns names: https://askubuntu.com/questions/81797/nslookup-finds-ip-but-ping-doesnt
 
 
+SSH_PUB_KEYS_2_INSTALL:
+- description: Windows key
+  value: ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAjsC7lRkcXPBluRyhA0EWNgOFlc1dg4TxxwOIwCXW6k3KEAUBCV7q6HEHY7W4qmoGvCPREvBT9l1nY8mB9pWeCdExIiGfJKKEUfGpjglMNdFq3/ONGoHjJaTlrXDG9Pr4FSpGpyYhhkTEcusmIWTQgqCh+qV8r9zqaNj/ocHolf7BoeZJbQ7RfrDgKqUcP5cPvD5tLfsdYTS7sSkhRDuXksbrt7PHleZrrg3VqxRdRKf2JtHoeD6kDfsimJwRc+X/LLC60EytBrqiGtbreMklB4hGpl/iySuTx7d29UZDi9LKFurkO50+WBKLApGlwrLU8gpBxhT+NdBDoc5t9JwFyw== windowsPutty
+- description: Laptop key
+  value: ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAC/8OR+845gri1Ov0FQDy52mD4ve3f/KXVl8DDyAqowpqTCQbFqu8qV/Jlc0px1fIU74gfcM1NgcqCCtzA3gMEwdQAfNH6+xP9icVKjkQoE3qFWNbfJs9SkAiIaB2yp84/Iu2oY2JjbWQUqoYJM9JXwWtoFjVCIY+a/APeFCaHPZbX4bQ== user@laptop
+- description: Macbook key
+  value: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCkObbalGeAteH/EMAl0VB790qM7s4U4FaOFRFxU91J4c8Cmjfov+YxiBz2hyWHqAtNwIFjp5nac9oZ71uX2EeUjFd6SvxSQK9h5EpVe0U4ZgAOVK3pzRR+COsHgr6gmBdE06WQR5xK04bDt9gyx5ZrgqNREPqj8eHqs5DoN+PSkw0lZvm4PMtpvsCig3/6yyV95HmhfnCxWdk/C3OjLElut2XR3esRZGXp2pWGAz97RmAxJD4EaDj29V8czlm//8VKAMJMXrZ6tbr2p++C5syEE/B6MkLpjZgsA9xIFmcQbbo1Drqz0OAOVAF4fyk3eH9maG68ksOX0ogixlVQ3eBd user@MacBook-Pro.local
+- description: Nas key
+  value: ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBADC2WHe1Z1C+ysjmEOie5C7cB5TLth7/2DA6I23s0QRU3Tk9NNpygnSeQB66fSpWntgUP8r7kpHI4cK1STo651bqwDgPSqWne+qfRvW8TkEoAhrDHC3czIwbVzgXdf0OBlZ1DQin1HRsLbsr4TlssgX4gRZgf4pTu/3lUDOO2JqJRJ91g== root@nas
+- description: Server key
+  value: ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAHRwJSmkSt/yataayHydu9qNUMfC07gP/p+kYOjvOxVIoXPboQAfWf8HDucD48FgPoNWv7NgPhl+5Z2f0jWKQpz2QEFEGs48ndsy9bTFQrgxhn8LVOhHTp1MXfhUuRmT1LoCiy2wEJJlCP8b5hMSk6eZipeKdYo+G3tFKArKAGJ5NVzAw== root@server
+
+ALIAS_2_INSTALL:
+  kubectl: microk8s kubectl
+  helm: microk8s helm3
+  getpods: microk8s kubectl get pod -A
+  delpod: microk8s kubectl delete pod
+  descpod: microk8s kubectl describe pod
+  execpod: microk8s kubectl exec -ti
+  logpod: microk8s kubectl logs
+  vault-edit: "EDITOR='code --wait' ansible-vault edit"
 
 # Generated
 KUBELET_PRIMARY_MASTER_HOSTNAME: "{{ groups['masters'][0] }}"
