@@ -20,7 +20,8 @@ POST_INSTALL_postgresop-crd=-${KUBECTL_BIN} apply -f https://raw.githubuserconte
 
 CERT_MANAGER_CDR_VERSION=1.1.0
 PRE_INSTALL_cert-manager=-${KUBECTL_BIN} create namespace cert-manager
-POST_INSTALL_cert-manager=while ! ${KUBECTL_BIN} get pods -A |grep cert-manager-webhook|grep Running; do echo .; sleep 2; done
+POST_INSTALL_cert-manager=${KUBECTL_BIN} apply -f https://github.com/jetstack/cert-manager/releases/download/v$(CERT_MANAGER_CDR_VERSION)/cert-manager.crds.yaml; \
+  while ! ${KUBECTL_BIN} get pods -A |grep cert-manager-webhook|grep Running; do echo .; sleep 2; done
 OPTIONS_cert-manager=--namespace cert-manager
 POST_DELETE_cert-manager=${KUBECTL_BIN} delete namespace cert-manager
 
@@ -61,9 +62,6 @@ pre-install: $(PRE_INSTALL)
 	@echo "All pre-installs executed:"
 	@echo "$(PRE_INSTALL)"
 	-${KUBECTL_BIN} create namespace test
-
-cert-manager-cdr:
-	${KUBECTL_BIN} apply -f https://github.com/jetstack/cert-manager/releases/download/v$(CERT_MANAGER_CDR_VERSION)/cert-manager.crds.yaml
 
 CHART_NAME=$(1)
 RELEASE_NAME=$(2)$(1)
