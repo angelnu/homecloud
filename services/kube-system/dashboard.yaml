@@ -26,9 +26,17 @@ spec:
   tls:
   - hosts:
     - dashboard.angelnu.com
+    - dashboard.home.angelnu.com
     secretName: prod-wildcard-angelnu-com-tls
   rules:
   - host: dashboard.angelnu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kubernetes-dashboard
+          servicePort: 80
+  - host: dashboard.home.angelnu.com
     http:
       paths:
       - path: /
