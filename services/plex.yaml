@@ -17,7 +17,7 @@ spec:
         k8s.v1.cni.cncf.io/networks: |
           [{
             "name":"macvlan-static",
-            "ips": ["192.168.1.2"]
+            "ips": ["192.168.1.2/26"]
           }]
     spec:
       #hostNetwork: true

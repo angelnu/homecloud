@@ -9,7 +9,7 @@ spec:
       "type": "macvlan",
       "capabilities": { "ips": true },
       "ipam": {
-        "type": "host-local",
+        "type": "static",
         "subnet": "192.168.0.0/19",
         "rangeStart": "192.168.1.0",
         "rangeEnd": "192.168.1.63",
