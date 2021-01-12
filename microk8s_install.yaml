@@ -55,6 +55,8 @@
       - result.rc != 0
       changed_when:
       - "'already exists'  not in result.stderr|join('')"
+      retries: 60
+      delay: 5
 
     - name: "Define docker secret as default"
       shell: |
