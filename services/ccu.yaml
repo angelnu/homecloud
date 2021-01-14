@@ -13,6 +13,12 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: ccu
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |
+          [{
+            "name":"macvlan-static",
+            "ips": ["192.168.1.3/19"]
+          }]
     spec:
       hostname: ccu
       nodeSelector:
