@@ -7,7 +7,8 @@ CRD_CHARTS=postgresop-crd cert-manager #db-crd openebs
 REGULAR_CHARTS= \
 metallb cert-manager-dnsmadeeasy certs ingress-nginx \
 home-assistant-wrapper esphome \
-ttrss nextcloud-bundle heimdall reverse-proxy gitea-wrapper
+ttrss nextcloud-bundle heimdall reverse-proxy gitea-wrapper \
+chirpstack-packet-multiplexer lorawan-server mosquitto-wrapper
 EXAMPLE_CHARTS=postgres postgresop cockroach login iobroker keel
 USED_CHILDRENS=$(CRD_CHARTS) $(REGULAR_CHARTS)
 ALL_CHILDRENS=$(USED_CHILDRENS) $(EXAMPLE_CHARTS)

@@ -65,5 +65,14 @@ dependencies:
 - name: gitea-wrapper
   repository: ""
   version: '>=0.1.0'
-digest: sha256:a01ed7741aad95e358c55b51bfb9d96b1e6f74275c79b57fe6621ea69178a796
-generated: "2021-01-10T19:14:43.155594039+01:00"
+- name: chirpstack-packet-multiplexer
+  repository: ""
+  version: '>=0.1.0'
+- name: lorawan-server
+  repository: ""
+  version: '>=0.1.0'
+- name: mosquitto
+  repository: https://storage.googleapis.com/t3n-helm-charts
+  version: '>=2.2.0'
+digest: sha256:8ead65337e84cd29b94c3f86fab797b777695f49eb4c6030c2996a2dd1b0baad
+generated: "2021-01-17T22:28:58.290629938+01:00"

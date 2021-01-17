@@ -122,3 +122,15 @@ dependencies:
 - name: gitea-wrapper
   version: ">=0.1.0"
   condition: gitea-wrapper.enabled,all.enabled
+
+- name: chirpstack-packet-multiplexer
+  version: ">=0.1.0"
+  condition: chirpstack-packet-multiplexer.enabled,all.enabled
+
+- name: lorawan-server
+  version: ">=0.1.0"
+  condition: lorawan-server.enabled,all.enabled
+
+- name: mosquitto-wrapper
+  version: ">=0.1.0"
+  condition: mosquitto-wrapper.enabled,all.enabled
