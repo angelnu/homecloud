@@ -84,7 +84,7 @@ metadata:
     ingress.kubernetes.io/auth-secret: "ingress-password"
 spec:
   rules:
-  - host: heketi.k8s.angelnu.com
+  - host: heketi.home.angelnu.com
     http:
       paths:
       - path: /
