@@ -10,6 +10,13 @@
         {{ key.value }}"
         {% endfor %}
 
+  - name: Copy ssh files
+    copy:
+      dest: "{{ item[0] }}"
+      mode: 0600
+      content: "{{ item[1] }}"
+    with_items: '{{ SSH_FILES_2_INSTALL.items() }}'
+
   - name: Insert/Update bash aliases
     blockinfile:
       path: .bashrc
