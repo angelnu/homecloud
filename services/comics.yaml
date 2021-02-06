@@ -52,17 +52,13 @@ spec:
                   #cpu: "500m"
               volumeMounts:
                 - mountPath: /feeds
-                  name: comics
+                  name: nfs-kubernetes
+                  subPath: ttrss/feeds
           restartPolicy: OnFailure
           volumes:
-            - name: comics
-              flexVolume:
-                driver: "angelnu/cifs"
-                secretRef:
-                  name: "cifs-secret"
-                options:
-                  source: "//nas.home.angelnu.com/reading/tiras_comicas/RSS-scrapping/feeds"
-                  mountOptions: "dir_mode=0755,file_mode=0755,noperm"
+            - name: nfs-kubernetes
+              persistentVolumeClaim:
+                claimName: nfs-kubernetes
 ---
 # ------------------- Test Job ------------------- #
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
@@ -131,19 +127,15 @@ spec:
             wait $!
           done
         volumeMounts:
-          - mountPath: /feeds
-            name: comics
+        - mountPath: /feeds
+          name: nfs-kubernetes
+          subPath: ttrss/feeds
       restartPolicy: Always
       terminationGracePeriodSeconds: 1
       volumes:
-        - name: comics
-          flexVolume:
-            driver: "angelnu/cifs"
-            secretRef:
-              name: "cifs-secret"
-            options:
-              source: "//nas.home.angelnu.com/reading/tiras_comicas/RSS-scrapping/feeds"
-              mountOptions: "dir_mode=0755,file_mode=0755,noperm"
+      - name: nfs-kubernetes
+        persistentVolumeClaim:
+          claimName: nfs-kubernetes
 ---
 # ------------------- NGINX Deployment ------------------- #
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
@@ -186,16 +178,12 @@ spec:
           failureThreshold: 12 # 2 minutes
         volumeMounts:
           - mountPath: /usr/share/nginx/html/scrapping
-            name: comics
+            name: nfs-kubernetes
+            subPath: ttrss/feeds
       volumes:
-        - name: comics
-          flexVolume:
-            driver: "angelnu/cifs"
-            secretRef:
-              name: "cifs-secret"
-            options:
-              source: "//nas.home.angelnu.com/reading/tiras_comicas/RSS-scrapping/feeds"
-              mountOptions: "ro,dir_mode=0755,file_mode=0644,noperm"
+      - name: nfs-kubernetes
+        persistentVolumeClaim:
+          claimName: nfs-kubernetes
 
 ---
 # -------------------- Service ------------------- #
