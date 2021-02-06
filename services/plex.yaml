@@ -13,12 +13,12 @@ spec:
       name: plex
       labels:
         app: plex
-      annotations:
-        k8s.v1.cni.cncf.io/networks: |
-          [{
-            "name":"macvlan-static",
-            "ips": ["192.168.1.2/19"]
-          }]
+      # annotations:
+      #   k8s.v1.cni.cncf.io/networks: |
+      #     [{
+      #       "name":"macvlan-static",
+      #       "ips": ["192.168.1.2"]
+      #     }]
     spec:
       #hostNetwork: true
       hostname: plex
