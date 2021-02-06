@@ -65,12 +65,12 @@
       retries: 60
       delay: 5
 
-    - name: "Define docker secret as default"
-      shell: |
-        {{ KUBECTL_BIN }} patch serviceaccount default -p '{"imagePullSecrets": [{"name": "regcred"}]}'
-      register: result
-      changed_when:
-      - "'(no change)'  not in result.stdout|join('')"
+    #- name: "Define docker secret as default"
+    #  shell: |
+    #    {{ KUBECTL_BIN }} patch serviceaccount default -p '{"imagePullSecrets": [{"name": "regcred"}]}'
+    #  register: result
+    #  changed_when:
+    #  - "'(no change)'  not in result.stdout|join('')"
     
     - name: Deploy dashboard
       import_tasks: tasks/dashboard.yaml
