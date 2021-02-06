@@ -1,6 +1,7 @@
 #Binaries
 KUBECTL_BIN=/snap/bin/microk8s kubectl
-HELM_BIN=/snap/bin/microk8s helm3
+#HELM_BIN=/snap/bin/microk8s helm3
+HELM_BIN=helm
 
 PRE_INSTALL=
 CRD_CHARTS=postgresop-crd cert-manager #db-crd openebs
@@ -8,7 +9,8 @@ REGULAR_CHARTS= \
 metallb cert-manager-dnsmadeeasy certs ingress-nginx \
 raspberrymatic home-assistant-wrapper esphome \
 ttrss nextcloud-bundle heimdall reverse-proxy gitea-wrapper \
-chirpstack-packet-multiplexer lorawan-server mosquitto-wrapper chirpstack-wrapper
+chirpstack-packet-multiplexer lorawan-server mosquitto-wrapper chirpstack-wrapper \
+unifi
 EXAMPLE_CHARTS=postgres postgresop cockroach login iobroker keel
 USED_CHILDRENS=$(CRD_CHARTS) $(REGULAR_CHARTS)
 ALL_CHILDRENS=$(USED_CHILDRENS) $(EXAMPLE_CHARTS)
