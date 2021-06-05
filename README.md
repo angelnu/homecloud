@@ -1,5 +1,8 @@
 ## Home Cloud deplyoment based on Kubernetes, iobroker and ansible
 
+**NOTE**: Archiving this since I moved to a [new setup based on gitops](https://github.com/angelnu/k8s-gitops) and the [k8s community](https://github.com/k8s-at-home).
+I keep it as reference only since I used it for several years.
+
 Creates/Updates my private cloud based on Kubernetes and deploy my services on it.
 
 - Support HA Kubernetes cluster on hybrid architectures (I run masters on ARM and a big worker on Intel)
